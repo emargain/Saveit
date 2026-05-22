@@ -129,7 +129,8 @@
     "successTitle": "Booked",
     "successBody": "Your spot is reserved. The partner will see this instantly.",
     "errorTitle": "Could not book",
-    "noSlots": "No live slots for this studio yet."
+    "noSlots": "No live slots for this studio yet.",
+    "requiresAuth": "You must be signed in to book."
   },
   "onboardingComplete": {
     "title": "You're all set",

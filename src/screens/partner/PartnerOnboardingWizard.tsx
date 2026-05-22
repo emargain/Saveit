@@ -66,7 +66,6 @@ export function PartnerOnboardingWizard() {
   const { t: tc } = useAppTranslation("common");
   const { userEmail, userId } = useAuth();
   const router = useRouter();
-  const ownerKey = userId ?? userEmail ?? "";
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -75,10 +74,10 @@ export function PartnerOnboardingWizard() {
   const [scheduleText, setScheduleText] = useState("");
 
   const load = useCallback(async () => {
-    if (!ownerKey) return;
-    const bundle = await ensureDraftBundle(ownerKey);
+    if (!userId) return;
+    const bundle = await ensureDraftBundle(userId);
     setStudio(bundle.studio);
-  }, [ownerKey]);
+  }, [userId]);
 
   useEffect(() => {
     void load();
@@ -189,6 +188,14 @@ export function PartnerOnboardingWizard() {
     if (res.canceled || !res.assets[0] || !studio) return;
     updateStudio({ logoUri: res.assets[0].uri });
   };
+
+  if (!userId) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <Text style={styles.muted}>{t("onboarding.requiresAuth")}</Text>
+      </SafeAreaView>
+    );
+  }
 
   if (!studio) {
     return (

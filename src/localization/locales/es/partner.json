@@ -65,7 +65,8 @@
     "saveDraft": "Guardar borrador",
     "validationRequired": "Completa los campos obligatorios.",
     "submittedTitle": "Enviado",
-    "submittedBody": "Revisaremos tu estudio. Tendrás acceso al panel cuando sea aprobado."
+    "submittedBody": "Revisaremos tu estudio. Tendrás acceso al panel cuando sea aprobado.",
+    "requiresAuth": "Debes iniciar sesión como socio para continuar."
   },
   "pending": {
     "title": "En revisión",

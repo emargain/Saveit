@@ -69,11 +69,14 @@ export default function PartnerDetailsScreen() {
   const liveSlots = useMemo(() => slots, [slots]);
 
   async function handleBook(slot: TimeSlotInventory) {
-    const customerId = userId ?? userEmail ?? "guest";
+    if (!userId) {
+      Alert.alert(t("booking.errorTitle"), t("booking.requiresAuth"));
+      return;
+    }
     const res = await createCustomerBooking({
       studioId: id!,
       slotId: slot.id,
-      customerUserId: customerId,
+      customerUserId: userId,
       customerEmail: userEmail,
       quantity: 1,
     });

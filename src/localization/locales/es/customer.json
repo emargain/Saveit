@@ -129,7 +129,8 @@
     "successTitle": "Reservado",
     "successBody": "Tu lugar quedó reservado. El socio lo verá al instante.",
     "errorTitle": "No se pudo reservar",
-    "noSlots": "Este estudio aún no tiene cupos publicados."
+    "noSlots": "Este estudio aún no tiene cupos publicados.",
+    "requiresAuth": "Debes iniciar sesión para reservar."
   },
   "onboardingComplete": {
     "title": "Todo listo",

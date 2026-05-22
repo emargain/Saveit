@@ -65,7 +65,8 @@
     "saveDraft": "Save draft",
     "validationRequired": "Please complete required fields.",
     "submittedTitle": "Submitted",
-    "submittedBody": "We’ll review your studio. You’ll get access to the dashboard when approved."
+    "submittedBody": "We’ll review your studio. You’ll get access to the dashboard when approved.",
+    "requiresAuth": "You must be signed in as a partner to continue."
   },
   "pending": {
     "title": "Under review",
