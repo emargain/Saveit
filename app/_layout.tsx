@@ -6,17 +6,23 @@
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { AuthProvider } from "../src/auth-context";
 import { I18nGate } from "../src/localization/I18nGate";
 import { OnboardingProvider } from "../src/onboarding-context";
+import { wipeStaleLocalBlobIfNeeded } from "../src/services/migrations";
 import { FavoritesProvider } from "../src/state/favorites";
 import { FiltersProvider } from "../src/state/filters";
 import { LocationProvider } from "../src/state/location";
 import { ViewsProvider } from "../src/state/views";
 
 export default function RootLayout() {
+  useEffect(() => {
+    void wipeStaleLocalBlobIfNeeded();
+  }, []);
+
   return (
     <I18nGate>
       <AuthProvider>

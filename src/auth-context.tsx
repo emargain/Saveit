@@ -21,7 +21,6 @@ import type { ReactNode } from "react";
 import { getSupabaseClient } from "./services/supabase/client";
 import type { UserRole } from "./types/domain";
 
-const AUTH_STORAGE_KEY = "@saveit_auth";
 const AUTH_INTENT_KEY = "@saveit_auth_intent_role";
 
 export type SignUpResult =
@@ -88,23 +87,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function normalizeStored(raw: unknown): AuthState | null {
-  if (!raw || typeof raw !== "object") return null;
-  const o = raw as Record<string, unknown>;
-  if (typeof o.isLoggedIn !== "boolean") return null;
-  const email = typeof o.userEmail === "string" ? o.userEmail : null;
-  // Customer-only mobile app: always force customer role.
-  // Old partner/admin sessions from AsyncStorage are treated as signed out.
-  const role: UserRole = "customer";
-  const userId = typeof o.userId === "string" ? o.userId : email;
-  return {
-    isLoggedIn: o.isLoggedIn,
-    userEmail: email,
-    userId,
-    role,
-  };
-}
-
 function parseIntent(raw: string | null): UserRole | null {
   if (raw === "customer" || raw === "partner" || raw === "admin") return raw;
   return null;
@@ -151,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (event === "SIGNED_OUT" || !session) {
             // Clear state directly; do not call signOut() to avoid recursion.
-            await saveAuthState({
+            applyAuthState({
               isLoggedIn: false,
               userEmail: null,
               userId: null,
@@ -168,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // SIGNED_IN (new user), TOKEN_REFRESHED (mismatch), or USER_UPDATED:
           // re-pull profile and rewrite state from the session.
           const profile = await fetchProfile(supabase, session.user.id);
-          await saveAuthState({
+          applyAuthState({
             isLoggedIn: true,
             userEmail: profile?.email ?? session.user.email ?? null,
             userId: session.user.id,
@@ -188,60 +170,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadAll() {
     try {
-      // Role-switch intent is independent of session; always load from AsyncStorage.
+      // Role-switch intent is a UI preference, not auth state; lives in AsyncStorage.
       const intentRaw = await AsyncStorage.getItem(AUTH_INTENT_KEY);
       if (intentRaw) {
         setAuthIntentRoleState(parseIntent(intentRaw));
       }
 
-      // Supabase session is the source of truth when a client is configured.
-      // getSession() rehydrates from secure storage automatically.
+      // Supabase session is the sole source of truth for auth state.
+      // getSession() rehydrates from the AsyncStorage adapter on the client.
       const supabase = getSupabaseClient();
-      if (supabase) {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Failed to get Supabase session:", error);
-        } else if (data.session) {
-          const session = data.session;
-          const profile = await fetchProfile(supabase, session.user.id);
-          if (!profile) {
-            console.error(
-              "Authenticated user has no profile row; defaulting role to 'customer'.",
-              { userId: session.user.id }
-            );
-          }
-          await saveAuthState({
-            isLoggedIn: true,
-            userEmail: profile?.email ?? session.user.email ?? null,
-            userId: session.user.id,
-            role: profile?.role ?? "customer",
-          });
-          return;
-        }
-      }
+      if (!supabase) return;
 
-      // Strangler fallback: no Supabase session → restore from AsyncStorage.
-      // Remove this branch once the new flow is fully trusted (Session 1e).
-      const authRaw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (authRaw) {
-        const parsed = normalizeStored(JSON.parse(authRaw));
-        if (parsed) {
-          setState(parsed);
-        } else {
-          const legacy = JSON.parse(authRaw) as {
-            isLoggedIn?: boolean;
-            userEmail?: string | null;
-          };
-          if (legacy.isLoggedIn && legacy.userEmail) {
-            setState({
-              isLoggedIn: true,
-              userEmail: legacy.userEmail,
-              userId: legacy.userEmail,
-              role: "customer",
-            });
-          }
-        }
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Failed to get Supabase session:", error);
+        return;
       }
+      if (!data.session) return;
+
+      const session = data.session;
+      const profile = await fetchProfile(supabase, session.user.id);
+      if (!profile) {
+        console.error(
+          "Authenticated user has no profile row; defaulting role to 'customer'.",
+          { userId: session.user.id }
+        );
+      }
+      applyAuthState({
+        isLoggedIn: true,
+        userEmail: profile?.email ?? session.user.email ?? null,
+        userId: session.user.id,
+        role: profile?.role ?? "customer",
+      });
     } catch (error) {
       console.error("Failed to load auth state:", error);
     } finally {
@@ -258,13 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthIntentRoleState(role);
   }, []);
 
-  async function saveAuthState(newState: AuthState) {
-    try {
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newState));
-      setState(newState);
-    } catch (error) {
-      console.error("Failed to save auth state:", error);
-    }
+  function applyAuthState(newState: AuthState) {
+    setState(newState);
   }
 
   const clearAuthIntent = useCallback(async () => {
@@ -315,10 +270,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
       }
 
-      // Strangler: still mirror to AsyncStorage so loadAll keeps working.
       // isLoggedIn stays false until the email is confirmed and the user
-      // signs in (handled in a later session).
-      await saveAuthState({
+      // signs in (we surface email/userId in state so the check-email screen
+      // can display them; the real session is owned by Supabase).
+      applyAuthState({
         isLoggedIn: false,
         userEmail: email,
         userId,
@@ -387,7 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // unreadable (also covers the backfill-just-happened case).
       const effectiveRole: UserRole = profile?.role ?? roleFromForm;
 
-      await saveAuthState({
+      applyAuthState({
         isLoggedIn: true,
         userEmail: profile?.email ?? email,
         userId,
@@ -417,10 +372,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Step 2: clear local state. The onAuthStateChange listener (Session 1c)
-    // will also fire SIGNED_OUT and call saveAuthState with the same shape —
+    // will also fire SIGNED_OUT and call applyAuthState with the same shape —
     // this direct call is idempotent and covers the "no supabase client"
     // path plus avoids a round-trip wait on the listener.
-    await saveAuthState({
+    applyAuthState({
       isLoggedIn: false,
       userEmail: null,
       userId: null,
@@ -434,7 +389,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setRole = useCallback(async (role: UserRole) => {
     if (!state.isLoggedIn || !state.userEmail) return;
-    await saveAuthState({
+    applyAuthState({
       ...state,
       role,
     });
@@ -445,7 +400,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsBeginningRoleSwitch(true);
       try {
         await persistIntent(target);
-        await saveAuthState({
+        applyAuthState({
           isLoggedIn: false,
           userEmail: null,
           userId: null,
