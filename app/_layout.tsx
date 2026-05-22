@@ -1,24 +1,48 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+/**
+ * Root layout — customer-only mobile app.
+ * No role switching, no partner routes, no admin routes in the navigation tree.
+ * Simple auth gate: loading → auth screens → customer tabs.
+ */
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import "react-native-reanimated";
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { AuthProvider } from "../src/auth-context";
+import { I18nGate } from "../src/localization/I18nGate";
+import { OnboardingProvider } from "../src/onboarding-context";
+import { FavoritesProvider } from "../src/state/favorites";
+import { FiltersProvider } from "../src/state/filters";
+import { LocationProvider } from "../src/state/location";
+import { ViewsProvider } from "../src/state/views";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <I18nGate>
+      <AuthProvider>
+        <OnboardingProvider>
+          <FavoritesProvider>
+            <FiltersProvider>
+              <ViewsProvider>
+                <LocationProvider>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(onboarding)" />
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="settings" />
+                    <Stack.Screen name="partner" />
+                    <Stack.Screen name="location-picker" />
+                    <Stack.Screen name="filters" options={{ presentation: "modal" }} />
+                    <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+                  </Stack>
+                  <StatusBar style="dark" />
+                </LocationProvider>
+              </ViewsProvider>
+            </FiltersProvider>
+          </FavoritesProvider>
+        </OnboardingProvider>
+      </AuthProvider>
+    </I18nGate>
   );
 }

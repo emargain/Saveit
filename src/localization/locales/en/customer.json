@@ -1,0 +1,139 @@
+{
+  "tabs": {
+    "home": "Home",
+    "discover": "Studios",
+    "browse": "Map",
+    "favorites": "Favorites",
+    "coach": "Savi",
+    "profile": "Profile"
+  },
+  "home": {
+    "greeting": "Hi there",
+    "promoted": "Promoted",
+    "categoriesTitle": "Top categories",
+    "nearYouTitle": "Last-minute spots near you",
+    "seeAll": "See all",
+    "saviTitle": "Ask Savi",
+    "saviSubtitle": "Your AI coach — get class recommendations, workout plans, and tips.",
+    "saviCta": "Chat with Savi",
+    "referTitle": "Invite friends",
+    "referSubtitle": "Share Saveit and help others save on studios and padel.",
+    "shareCta": "Share Saveit",
+    "emptyTitle": "You have no classes yet",
+    "emptySubtitle": "Discover last-minute spots and book your first session.",
+    "discoverCta": "Discover deals",
+    "justForYou": "Just for you",
+    "categories": {
+      "fitness": "Fitness",
+      "yoga": "Yoga / Flex",
+      "padel": "Padel",
+      "beauty": "Beauty",
+      "wellness": "Wellness",
+      "boxing": "Boxing"
+    }
+  },
+  "discover": {
+    "currentLocation": "Current location",
+    "searchPlaceholder": "Search partners, tags, category…",
+    "sortBy": "Sort by",
+    "sortRelevance": "Relevance",
+    "sortDistance": "Distance (closest first)",
+    "sortDiscount": "Discount (highest first)",
+    "sortRating": "Rating (highest first)",
+    "emptyTitle": "No matches yet",
+    "emptySubtitle": "Try another category or clear your search.",
+    "emptyBookedTitle": "All booked for now!",
+    "emptyBookedDesc": "No last-minute spots available right now.\nCheck back soon – partners add new deals daily.",
+    "notifyMe": "Notify me",
+    "sectionTitle": "Last-minute spots near you",
+    "categories": {
+      "all": "All",
+      "fitness": "Fitness",
+      "padel": "Padel",
+      "beauty": "Beauty",
+      "wellness": "Wellness"
+    }
+  },
+  "browse": {
+    "searchPlaceholder": "Search for partners or deals…",
+    "list": "List",
+    "map": "Map",
+    "emptyList": "No partners match your search."
+  },
+  "partnerDetail": {
+    "notFound": "Partner not found",
+    "header": "Partner",
+    "tags": "Tags",
+    "fromPrice": "From ${{from}} – ${{to}}",
+    "off": "{{percent}}% off",
+    "book": "Book",
+    "slots": "Available slots"
+  },
+  "partnerCard": {
+    "from": "From ${{price}}",
+    "off": "{{percent}}% off",
+    "km": "{{n}} km"
+  },
+  "profile": {
+    "title": "Profile",
+    "noEmail": "No email",
+    "preferences": "Your preferences",
+    "exerciseTypes": "Exercise types",
+    "frequency": "Workout frequency",
+    "frequencyValue_one": "{{count}} day per week",
+    "frequencyValue_other": "{{count}} days per week",
+    "notSet": "Not set",
+    "whySaveit": "Why Saveit",
+    "analytics": "Analytics",
+    "partnerViews": "Partner views",
+    "viewsTotal_one": "{{count}} view total",
+    "viewsTotal_other": "{{count}} views total",
+    "mostViewed": "Most viewed",
+    "viewsCount_one": "{{count}} view",
+    "viewsCount_other": "{{count}} views",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "openSettings": "App settings & language",
+    "roleSettingsTitle": "Account type",
+    "roleCurrentLabel": "You are signed in as",
+    "roleCustomerLabel": "Customer",
+    "rolePartnerLabel": "Partner (studio)",
+    "roleAdminLabel": "Administrator",
+    "switchToCustomer": "Use customer account",
+    "switchToPartner": "Use partner / studio account",
+    "switchFromAdmin": "Leave admin — sign in as customer",
+    "roleSwitchExplainer": "To protect your accounts, switching opens sign-in. Use the email and password for that account type.",
+    "partnerRoleExplainer": "Switching to customer opens sign-in for a shopper account. Your studio data stays linked to your partner login."
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "help": "Help",
+    "languageSection": "Language",
+    "devRoleSection": "Development",
+    "devRoleHint": "Switch role to test partner or admin flows (local only).",
+    "roleCustomer": "Customer",
+    "rolePartner": "Partner",
+    "roleAdmin": "Admin"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "emptyTitle": "Your favorites live here",
+    "emptyDesc": "Tap the heart on any deal or last-minute spot to save it.\nWe'll keep them right here for you!",
+    "tapHint": "Tap to save",
+    "browse": "Browse Discover"
+  },
+  "booking": {
+    "successTitle": "Booked",
+    "successBody": "Your spot is reserved. The partner will see this instantly.",
+    "errorTitle": "Could not book",
+    "noSlots": "No live slots for this studio yet."
+  },
+  "onboardingComplete": {
+    "title": "You're all set",
+    "body": "Your preferences are saved. Continue to the app or return to the sign-in screen.",
+    "continueApp": "Continue to app"
+  }
+}

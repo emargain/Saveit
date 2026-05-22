@@ -1,0 +1,139 @@
+{
+  "tabs": {
+    "home": "Inicio",
+    "discover": "Estudios",
+    "browse": "Mapa",
+    "favorites": "Favoritos",
+    "coach": "Savi",
+    "profile": "Perfil"
+  },
+  "home": {
+    "greeting": "Hola",
+    "promoted": "Promocionados",
+    "categoriesTitle": "Categorías principales",
+    "nearYouTitle": "Lugares de último minuto cerca de ti",
+    "seeAll": "Ver todo",
+    "saviTitle": "Pregunta a Savi",
+    "saviSubtitle": "Tu coach con IA — obtén recomendaciones de clases, planes de entreno y tips.",
+    "saviCta": "Chatear con Savi",
+    "referTitle": "Invita amigos",
+    "referSubtitle": "Comparte Saveit y ayuda a otros a ahorrar en estudios y pádel.",
+    "shareCta": "Compartir Saveit",
+    "emptyTitle": "Aún no tienes clases",
+    "emptySubtitle": "Descubre lugares de último minuto y reserva tu primera sesión.",
+    "discoverCta": "Ver ofertas",
+    "justForYou": "Para ti",
+    "categories": {
+      "fitness": "Fitness",
+      "yoga": "Yoga / Flex",
+      "padel": "Pádel",
+      "beauty": "Belleza",
+      "wellness": "Bienestar",
+      "boxing": "Boxeo"
+    }
+  },
+  "discover": {
+    "currentLocation": "Ubicación actual",
+    "searchPlaceholder": "Busca socios, etiquetas, categoría…",
+    "sortBy": "Ordenar por",
+    "sortRelevance": "Relevancia",
+    "sortDistance": "Distancia (más cercano)",
+    "sortDiscount": "Descuento (mayor primero)",
+    "sortRating": "Calificación (mayor primero)",
+    "emptyTitle": "Sin resultados",
+    "emptySubtitle": "Prueba otra categoría o borra la búsqueda.",
+    "emptyBookedTitle": "¡Todo reservado por ahora!",
+    "emptyBookedDesc": "No hay lugares de último minuto ahora.\nVuelve pronto: los socios publican ofertas cada día.",
+    "notifyMe": "Avísame",
+    "sectionTitle": "Lugares de último minuto cerca de ti",
+    "categories": {
+      "all": "Todos",
+      "fitness": "Fitness",
+      "padel": "Pádel",
+      "beauty": "Belleza",
+      "wellness": "Bienestar"
+    }
+  },
+  "browse": {
+    "searchPlaceholder": "Busca socios u ofertas…",
+    "list": "Lista",
+    "map": "Mapa",
+    "emptyList": "Ningún socio coincide con tu búsqueda."
+  },
+  "partnerDetail": {
+    "notFound": "No se encontró el socio",
+    "header": "Socio",
+    "tags": "Etiquetas",
+    "fromPrice": "Desde ${{from}} – ${{to}}",
+    "off": "{{percent}}% dto.",
+    "book": "Reservar",
+    "slots": "Cupos disponibles"
+  },
+  "partnerCard": {
+    "from": "Desde ${{price}}",
+    "off": "{{percent}}% dto.",
+    "km": "{{n}} km"
+  },
+  "profile": {
+    "title": "Perfil",
+    "noEmail": "Sin correo",
+    "preferences": "Tus preferencias",
+    "exerciseTypes": "Tipos de ejercicio",
+    "frequency": "Frecuencia de entreno",
+    "frequencyValue_one": "{{count}} día por semana",
+    "frequencyValue_other": "{{count}} días por semana",
+    "notSet": "Sin definir",
+    "whySaveit": "Por qué Saveit",
+    "analytics": "Analítica",
+    "partnerViews": "Vistas a socios",
+    "viewsTotal_one": "{{count}} vista en total",
+    "viewsTotal_other": "{{count}} vistas en total",
+    "mostViewed": "Más vistos",
+    "viewsCount_one": "{{count}} vista",
+    "viewsCount_other": "{{count}} vistas",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión…",
+    "openSettings": "Ajustes de app e idioma",
+    "roleSettingsTitle": "Tipo de cuenta",
+    "roleCurrentLabel": "Tienes la sesión iniciada como",
+    "roleCustomerLabel": "Cliente",
+    "rolePartnerLabel": "Socio (estudio)",
+    "roleAdminLabel": "Administrador",
+    "switchToCustomer": "Usar cuenta de cliente",
+    "switchToPartner": "Usar cuenta de socio / estudio",
+    "switchFromAdmin": "Salir de admin — iniciar como cliente",
+    "roleSwitchExplainer": "Por seguridad, al cambiar te pedimos iniciar sesión. Usa el correo y contraseña de ese tipo de cuenta.",
+    "partnerRoleExplainer": "Si cambias a cliente, se abrirá el acceso para una cuenta de comprador. Los datos de tu estudio siguen ligados a tu acceso de socio."
+  },
+  "settings": {
+    "title": "Ajustes",
+    "account": "Cuenta",
+    "notifications": "Notificaciones",
+    "privacy": "Privacidad",
+    "help": "Ayuda",
+    "languageSection": "Idioma",
+    "devRoleSection": "Desarrollo",
+    "devRoleHint": "Cambia el rol para probar flujos de socio o admin (solo local).",
+    "roleCustomer": "Cliente",
+    "rolePartner": "Socio",
+    "roleAdmin": "Admin"
+  },
+  "favorites": {
+    "title": "Favoritos",
+    "emptyTitle": "Tus favoritos van aquí",
+    "emptyDesc": "Toca el corazón en cualquier oferta para guardarla.\n¡Las tendremos listas aquí!",
+    "tapHint": "Toca para guardar",
+    "browse": "Ir a Descubrir"
+  },
+  "booking": {
+    "successTitle": "Reservado",
+    "successBody": "Tu lugar quedó reservado. El socio lo verá al instante.",
+    "errorTitle": "No se pudo reservar",
+    "noSlots": "Este estudio aún no tiene cupos publicados."
+  },
+  "onboardingComplete": {
+    "title": "Todo listo",
+    "body": "Tus preferencias están guardadas. Continúa a la app o vuelve a la pantalla de inicio de sesión.",
+    "continueApp": "Continuar a la app"
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "onboarding": {
+    "title": "Registro de socio",
+    "progress": "Paso {{current}} de {{total}}",
+    "stepAccount": "Cuenta",
+    "stepBasics": "Datos del negocio",
+    "stepBrand": "Marca y descripción",
+    "stepPhotos": "Fotos",
+    "stepLocation": "Ubicación y contacto",
+    "stepCategory": "Categoría y servicios",
+    "stepPricing": "Precios",
+    "stepPeak": "Horas pico y ocupación",
+    "stepDemand": "Demanda por día",
+    "stepInventory": "Horarios y cupos",
+    "stepRules": "Cupo y cancelaciones",
+    "stepReview": "Revisión",
+    "stepInventoryType": "Tipo de inventario",
+    "stepInventoryTypeHint": "¿Cómo vendes cupo en SaveIt? Podrás definir cupos detallados después en tu panel.",
+    "stepTax": "Datos fiscales (placeholder)",
+    "accountHint": "Iniciaste sesión como {{email}}. Continúa para registrar tu negocio.",
+    "fieldStudioName": "Nombre del estudio o negocio",
+    "fieldBrandName": "Nombre de marca (si es distinto)",
+    "fieldDescription": "Descripción breve",
+    "fieldLogo": "Logo (opcional)",
+    "fieldPhotos": "Fotos del estudio",
+    "pickImages": "Elegir imágenes",
+    "fieldAddress": "Dirección línea 1",
+    "fieldCity": "Ciudad",
+    "fieldRegion": "Estado / región",
+    "fieldPostal": "Código postal",
+    "fieldCountry": "País",
+    "fieldContactEmail": "Correo del negocio",
+    "fieldPhone": "Teléfono",
+    "fieldWebsite": "Sitio web (opcional)",
+    "fieldInstagram": "Instagram (opcional)",
+    "fieldCategory": "Categoría principal",
+    "fieldServiceTypes": "Tipos de servicio (separados por coma)",
+    "fieldAvgPrice": "Precio promedio al público (MXN)",
+    "fieldMinPrice": "Precio mínimo aceptable en SaveIt (MXN)",
+    "fieldDiscount": "Descuento por defecto %",
+    "fieldPricingBehavior": "Comportamiento de precio",
+    "pricingFixed": "Descuento fijo",
+    "pricingDynamic": "Dinámico con piso",
+    "pricingManual": "Manual por cupo",
+    "fieldPeak": "Horas pico (ej. Lun 17:00-20:00)",
+    "fieldOffPeak": "Ocupación típica fuera de pico %",
+    "fieldDemand": "Notas de demanda por día/hora",
+    "fieldSchedules": "Bloques de horario (uno por línea: Día HH:MM-HH:MM)",
+    "fieldSlotTitle": "Título de cupo de ejemplo",
+    "fieldSlotKind": "Tipo de inventario",
+    "kindClass": "Clase",
+    "kindCourt": "Cancha",
+    "kindSession": "Sesión",
+    "kindOther": "Otro",
+    "fieldSlotTime": "Hora inicio (HH:MM)",
+    "fieldDuration": "Duración (minutos)",
+    "fieldCapacity": "Cupo",
+    "fieldSaveItPrice": "Precio en SaveIt (MXN)",
+    "fieldRetailPrice": "Precio al público (MXN)",
+    "fieldCancelHours": "Cancelación gratis (horas antes)",
+    "fieldAutoPublish": "Publicar nuevos cupos al aprobar",
+    "fieldLegalName": "Razón social (opcional)",
+    "fieldTaxId": "RFC / ID fiscal (opcional)",
+    "reviewSubmit": "Enviar a revisión",
+    "saveDraft": "Guardar borrador",
+    "validationRequired": "Completa los campos obligatorios.",
+    "submittedTitle": "Enviado",
+    "submittedBody": "Revisaremos tu estudio. Tendrás acceso al panel cuando sea aprobado."
+  },
+  "pending": {
+    "title": "En revisión",
+    "body": "Tu solicitud está en revisión. Suele ser rápido.",
+    "status": "Estado: {{status}}"
+  },
+  "rejected": {
+    "title": "Cambios necesarios",
+    "reason": "Comentarios: {{reason}}",
+    "cta": "Editar y reenviar"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "studio": "Estudio",
+    "inventory": "Cupos",
+    "bookings": "Citas",
+    "profile": "Perfil",
+    "more": "Más"
+  },
+  "profileHub": {
+    "title": "Perfil de socio",
+    "toolsSection": "Herramientas del negocio"
+  },
+  "dashboard": {
+    "title": "Panel de socio",
+    "subtitle": "Resumen de {{name}}",
+    "bookings": "Citas",
+    "revenue": "Ingresos (periodo)",
+    "liveSlots": "Cupos llenos",
+    "occupancy": "Ocupación est.",
+    "quickAddSlot": "Agregar cupo",
+    "manageStudio": "Editar estudio",
+    "noBookings": "Aún no hay reservas",
+    "periodFilters": "Filtros por fecha y servicio próximamente."
+  },
+  "studio": {
+    "title": "Perfil del estudio",
+    "hint": "Los cambios se reflejan en la app de clientes tras aprobación."
+  },
+  "inventory": {
+    "title": "Inventario",
+    "empty": "Sin cupos. Agrega disponibilidad recurrente o puntual.",
+    "add": "Agregar cupo",
+    "duplicate": "Duplicar",
+    "pause": "Pausar",
+    "live": "En vivo",
+    "draft": "Borrador",
+    "paused": "Pausado"
+  },
+  "bookings": {
+    "title": "Reservas",
+    "empty": "Cuando un cliente reserve, aparecerá aquí al instante."
+  },
+  "more": {
+    "roleSettingsTitle": "Tipo de cuenta",
+    "roleCurrentLabel": "Tienes la sesión iniciada como",
+    "roleCustomerLabel": "Cliente",
+    "rolePartnerLabel": "Socio (estudio)",
+    "roleAdminLabel": "Administrador",
+    "switchToCustomer": "Usar cuenta de cliente",
+    "switchToPartner": "Usar cuenta de socio / estudio",
+    "switchFromAdmin": "Salir de admin — iniciar como cliente",
+    "roleSwitchExplainer": "Cambiar de tipo de cuenta cierra tu sesión y abre el acceso para el rol que elijas.",
+    "partnerRoleExplainer": "Si cambias a cliente, cerramos sesión y abrimos el acceso de comprador. Tu estudio sigue ligado a tu cuenta de socio.",
+    "title": "Herramientas",
+    "analytics": "Rendimiento",
+    "revenue": "Ingresos",
+    "pricing": "Precios",
+    "settings": "Ajustes del negocio",
+    "support": "Ayuda",
+    "language": "Idioma"
+  },
+  "analytics": {
+    "title": "Analítica",
+    "placeholder": "Gráficas y tendencias se conectarán a tu backend."
+  },
+  "revenue": {
+    "title": "Ingresos",
+    "placeholder": "Resumen de pagos cuando actives cobros."
+  },
+  "pricing": {
+    "title": "Precios",
+    "placeholder": "Ajusta descuentos y pisos; reglas dinámicas aquí."
+  },
+  "bizSettings": {
+    "title": "Ajustes del negocio",
+    "placeholder": "Perfil fiscal y avisos — amplía cuando escales."
+  },
+  "support": {
+    "title": "Soporte",
+    "body": "Escríbenos a partners@saveit.app (placeholder)."
+  }
+}

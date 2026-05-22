@@ -1,0 +1,25 @@
+{
+  "appName": "Saveit",
+  "loading": "Loading…",
+  "save": "Save",
+  "cancel": "Cancel",
+  "continue": "Continue",
+  "back": "Back",
+  "next": "Next",
+  "submit": "Submit",
+  "edit": "Edit",
+  "delete": "Delete",
+  "done": "Done",
+  "retry": "Retry",
+  "refresh": "Refresh",
+  "backToSignIn": "Back to sign in",
+  "search": "Search",
+  "settings": "Settings",
+  "language": "Language",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish (Mexico)",
+  "languageDevice": "Use device language",
+  "errors": {
+    "generic": "Something went wrong. Try again."
+  }
+}

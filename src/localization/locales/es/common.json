@@ -1,0 +1,25 @@
+{
+  "appName": "Saveit",
+  "loading": "Cargando…",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "continue": "Continuar",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "submit": "Enviar",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "done": "Listo",
+  "retry": "Reintentar",
+  "refresh": "Actualizar",
+  "backToSignIn": "Volver al inicio de sesión",
+  "search": "Buscar",
+  "settings": "Ajustes",
+  "language": "Idioma",
+  "languageEnglish": "Inglés",
+  "languageSpanish": "Español (México)",
+  "languageDevice": "Usar idioma del dispositivo",
+  "errors": {
+    "generic": "Algo salió mal. Intenta de nuevo."
+  }
+}

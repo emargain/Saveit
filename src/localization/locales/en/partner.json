@@ -1,0 +1,161 @@
+{
+  "onboarding": {
+    "title": "Partner onboarding",
+    "progress": "Step {{current}} of {{total}}",
+    "stepAccount": "Account",
+    "stepBasics": "Business basics",
+    "stepBrand": "Brand & description",
+    "stepPhotos": "Photos",
+    "stepLocation": "Location & contact",
+    "stepCategory": "Category & services",
+    "stepPricing": "Pricing",
+    "stepPeak": "Peak hours & occupancy",
+    "stepDemand": "Demand by day",
+    "stepInventory": "Schedules & slots",
+    "stepRules": "Capacity & cancellation",
+    "stepReview": "Review",
+    "stepInventoryType": "Inventory type",
+    "stepInventoryTypeHint": "How do you sell capacity on SaveIt? You can add detailed slots later in your dashboard.",
+    "stepTax": "Legal placeholders",
+    "accountHint": "You're signed in as {{email}}. Continue to register your business.",
+    "fieldStudioName": "Studio or business name",
+    "fieldBrandName": "Brand name (if different)",
+    "fieldDescription": "Short description",
+    "fieldLogo": "Logo (optional)",
+    "fieldPhotos": "Studio photos",
+    "pickImages": "Choose images",
+    "fieldAddress": "Address line 1",
+    "fieldCity": "City",
+    "fieldRegion": "State / region",
+    "fieldPostal": "Postal code",
+    "fieldCountry": "Country",
+    "fieldContactEmail": "Business email",
+    "fieldPhone": "Phone",
+    "fieldWebsite": "Website (optional)",
+    "fieldInstagram": "Instagram (optional)",
+    "fieldCategory": "Primary category",
+    "fieldServiceTypes": "Service types (comma separated)",
+    "fieldAvgPrice": "Average retail price (MXN)",
+    "fieldMinPrice": "Minimum acceptable SaveIt price (MXN)",
+    "fieldDiscount": "Default discount %",
+    "fieldPricingBehavior": "Pricing behavior",
+    "pricingFixed": "Fixed discount",
+    "pricingDynamic": "Dynamic with floor",
+    "pricingManual": "Manual per slot",
+    "fieldPeak": "Peak hours (e.g. Mon 17:00-20:00)",
+    "fieldOffPeak": "Typical off-peak occupancy %",
+    "fieldDemand": "Demand notes by day/time",
+    "fieldSchedules": "Schedule blocks (one per line: Day HH:MM-HH:MM)",
+    "fieldSlotTitle": "Sample slot title",
+    "fieldSlotKind": "Inventory type",
+    "kindClass": "Class",
+    "kindCourt": "Court",
+    "kindSession": "Session",
+    "kindOther": "Other",
+    "fieldSlotTime": "Start time (HH:MM)",
+    "fieldDuration": "Duration (minutes)",
+    "fieldCapacity": "Capacity",
+    "fieldSaveItPrice": "SaveIt listing price (MXN)",
+    "fieldRetailPrice": "Retail price (MXN)",
+    "fieldCancelHours": "Free cancel (hours before)",
+    "fieldAutoPublish": "Auto-publish new slots when approved",
+    "fieldLegalName": "Legal business name (optional)",
+    "fieldTaxId": "Tax ID placeholder (optional)",
+    "reviewSubmit": "Submit for review",
+    "saveDraft": "Save draft",
+    "validationRequired": "Please complete required fields.",
+    "submittedTitle": "Submitted",
+    "submittedBody": "We’ll review your studio. You’ll get access to the dashboard when approved."
+  },
+  "pending": {
+    "title": "Under review",
+    "body": "Your application is being reviewed. This usually takes a short time.",
+    "status": "Status: {{status}}"
+  },
+  "rejected": {
+    "title": "Needs changes",
+    "reason": "Feedback: {{reason}}",
+    "cta": "Edit and resubmit"
+  },
+  "tabs": {
+    "home": "Home",
+    "studio": "Studio",
+    "inventory": "Slots",
+    "bookings": "Appointments",
+    "profile": "Profile",
+    "more": "More"
+  },
+  "profileHub": {
+    "title": "Partner profile",
+    "toolsSection": "Business tools"
+  },
+  "dashboard": {
+    "title": "Partner hub",
+    "subtitle": "Overview for {{name}}",
+    "bookings": "Appointments",
+    "revenue": "Revenue (period)",
+    "liveSlots": "Filled spots",
+    "occupancy": "Est. occupancy",
+    "quickAddSlot": "Add slot",
+    "manageStudio": "Edit studio",
+    "noBookings": "No bookings yet",
+    "periodFilters": "Filters: date range & service type coming soon."
+  },
+  "studio": {
+    "title": "Studio profile",
+    "hint": "Updates here sync to the customer app after approval."
+  },
+  "inventory": {
+    "title": "Inventory",
+    "empty": "No slots yet. Add recurring or one-off availability.",
+    "add": "Add slot",
+    "duplicate": "Duplicate",
+    "pause": "Pause",
+    "live": "Live",
+    "draft": "Draft",
+    "paused": "Paused"
+  },
+  "bookings": {
+    "title": "Bookings",
+    "empty": "When customers book, they appear here instantly."
+  },
+  "more": {
+    "roleSettingsTitle": "Account type",
+    "roleCurrentLabel": "You are signed in as",
+    "roleCustomerLabel": "Customer",
+    "rolePartnerLabel": "Partner (studio)",
+    "roleAdminLabel": "Administrator",
+    "switchToCustomer": "Use customer account",
+    "switchToPartner": "Use partner / studio account",
+    "switchFromAdmin": "Leave admin — sign in as customer",
+    "roleSwitchExplainer": "Switching account types signs you out and opens sign-in for the role you pick.",
+    "partnerRoleExplainer": "Switching to customer signs you out and opens shopper sign-in. Your studio stays under your partner credentials.",
+    "title": "Business tools",
+    "analytics": "Performance",
+    "revenue": "Revenue",
+    "pricing": "Pricing controls",
+    "settings": "Business settings",
+    "support": "Help & support",
+    "language": "Language"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "placeholder": "Charts and trends will connect to your backend data."
+  },
+  "revenue": {
+    "title": "Revenue",
+    "placeholder": "Payout summaries can plug in when payments go live."
+  },
+  "pricing": {
+    "title": "Pricing",
+    "placeholder": "Tune discounts and floors; dynamic rules extend here."
+  },
+  "bizSettings": {
+    "title": "Business settings",
+    "placeholder": "Tax profile and notifications — extend as you scale."
+  },
+  "support": {
+    "title": "Support",
+    "body": "Email us at partners@saveit.app (placeholder)."
+  }
+}

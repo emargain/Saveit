@@ -1,35 +1,120 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+/**
+ * Customer Tabs — Home, Favorites, Map, Savi, Profile.
+ * Discover is accessible from Home via category taps and "See all".
+ */
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTranslation } from "../../src/localization/hooks";
+import { colors, radius, spacing } from "../../src/ui/theme";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+function TabIcon({
+  name,
+  focused,
+  color,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  focused: boolean;
+  color: string;
+}) {
+  return (
+    <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+      <Ionicons name={name} size={22} color={color} />
+    </View>
+  );
+}
+
+export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const { t } = useAppTranslation("customer");
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          ...styles.tabBar,
+          paddingTop: 12,
+          paddingBottom: insets.bottom + 10,
+        },
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarItemStyle: styles.tabItem,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: t("tabs.home"),
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? "home" : "home-outline"} focused={focused} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="favorites"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: t("tabs.favorites"),
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? "heart" : "heart-outline"} focused={focused} color={color} />
+          ),
         }}
       />
+      <Tabs.Screen
+        name="browse"
+        options={{
+          title: t("tabs.browse"),
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? "map" : "map-outline"} focused={focused} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="coach"
+        options={{
+          title: t("tabs.coach"),
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? "chatbubbles" : "chatbubbles-outline"} focused={focused} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t("tabs.profile"),
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? "person" : "person-outline"} focused={focused} color={color} />
+          ),
+        }}
+      />
+      {/* Discover is still accessible as a screen but hidden from tab bar */}
+      <Tabs.Screen name="discover" options={{ href: null }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.white,
+    borderTopColor: colors.borderLight,
+    borderTopWidth: 1,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    height: 64,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  tabItem: { paddingVertical: spacing.xs },
+  tabLabel: { fontSize: 11, fontWeight: "600", marginTop: 2 },
+  iconContainer: {
+    width: 48,
+    height: 28,
+    borderRadius: radius.md,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconContainerActive: { backgroundColor: colors.secondaryLight },
+});

@@ -1,0 +1,12 @@
+{
+  "title": "Admin",
+  "subtitle": "Approve partner studios",
+  "empty": "No applications in review.",
+  "approve": "Approve",
+  "reject": "Reject",
+  "rejectPromptTitle": "Rejection reason",
+  "rejectPlaceholder": "Explain what to fix",
+  "studio": "Studio",
+  "owner": "Owner id",
+  "status": "Status"
+}

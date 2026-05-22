@@ -1,0 +1,12 @@
+{
+  "title": "Admin",
+  "subtitle": "Aprobar estudios socios",
+  "empty": "No hay solicitudes en revisión.",
+  "approve": "Aprobar",
+  "reject": "Rechazar",
+  "rejectPromptTitle": "Motivo del rechazo",
+  "rejectPlaceholder": "Indica qué corregir",
+  "studio": "Estudio",
+  "owner": "ID del propietario",
+  "status": "Estado"
+}
