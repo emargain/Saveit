@@ -1,40 +1,49 @@
 /**
- * Onboarding Context - Manages onboarding state and user profile data
- * 
- * Provides:
- * - onboardingCompleted: boolean indicating if user finished onboarding
- * - isLoading: true while loading state from AsyncStorage
- * - profile: user's survey answers (exercise types, frequency, reasons)
- * - setOnboardingCompleted(): mark onboarding as done
- * - updateProfile(): save survey answers
- * - resetOnboarding(): clear onboarding state (for testing)
+ * Onboarding Context — preferences state for the wizard + profile screen.
+ *
+ * Storage model (Session 2b):
+ *   - AsyncStorage is a write-through cache for instant local state, also
+ *     used as the staging area for preferences entered before email
+ *     confirmation completes (no Supabase session yet).
+ *   - Supabase (public.user_preferences) is the source of truth when a user
+ *     is signed in. On sign-in: server data overrides local; if server has
+ *     none AND local has meaningful data, local is flushed up.
+ *   - On sign-out: local cache is wiped so the next user on the same device
+ *     doesn't inherit the previous user's preferences.
+ *
+ * Consumer API (unchanged from pre-2b): onboardingCompleted, profile,
+ * setOnboardingCompleted, updateProfile, resetOnboarding.
  */
 
-import { createContext, useContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 
-// Storage keys
+import { useAuth } from "./auth-context";
+import {
+  fetchUserPreferences,
+  upsertUserPreferences,
+  type OnboardingPreferences,
+} from "./services/preferences-service";
+
 const ONBOARDING_COMPLETED_KEY = "@saveit_onboarding_completed";
 const ONBOARDING_PROFILE_KEY = "@saveit_onboarding_profile";
 
-// User's onboarding profile from surveys
 export interface OnboardingProfile {
-  exerciseTypes: string[];    // e.g., ["Yoga", "HIIT", "Cycling"]
-  frequency: number;          // 1-7 days per week
-  reasons: string[];          // e.g., ["Saving money", "Flexibility"]
-  cookiesAccepted: boolean;   // Did user accept cookies
+  exerciseTypes: string[];
+  /** null = user hasn't picked a frequency yet (distinguishes "default" from "explicit value"). */
+  frequency: number | null;
+  reasons: string[];
+  cookiesAccepted: boolean;
 }
 
-// Default empty profile
 const defaultProfile: OnboardingProfile = {
   exerciseTypes: [],
-  frequency: 3,
+  frequency: null,
   reasons: [],
   cookiesAccepted: false,
 };
 
-// Shape of the context value
 interface OnboardingContextType {
   onboardingCompleted: boolean;
   isLoading: boolean;
@@ -44,46 +53,139 @@ interface OnboardingContextType {
   resetOnboarding: () => Promise<void>;
 }
 
-// Create the context
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 /**
- * OnboardingProvider - Wrap your app with this to provide onboarding state
+ * Project the wizard's OnboardingProfile shape down to what user_preferences
+ * stores. `reasons` and `cookiesAccepted` are intentionally client-only —
+ * see judgment-call note in the session 2b report.
  */
+function profileToPrefs(p: OnboardingProfile): OnboardingPreferences {
+  return {
+    exerciseTypes: p.exerciseTypes,
+    frequencyPerWeek: p.frequency,
+    motivation: null,
+  };
+}
+
+function hasMeaningfulPrefs(p: OnboardingProfile): boolean {
+  return p.exerciseTypes.length > 0 || p.frequency !== null;
+}
+
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [onboardingCompleted, setCompleted] = useState(false);
   const [profile, setProfile] = useState<OnboardingProfile>(defaultProfile);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load onboarding state from AsyncStorage on mount
+  const { userId, isLoggedIn } = useAuth();
+
+  // Mirror profile in a ref so setOnboardingCompleted reads the freshest
+  // value when it upserts, avoiding stale-closure issues if the wizard
+  // chains updateProfile() and setOnboardingCompleted() in the same tick.
+  const profileRef = useRef(profile);
   useEffect(() => {
-    loadOnboardingState();
+    profileRef.current = profile;
+  }, [profile]);
+
+  // Track sign-in/sign-out transitions. Only treat a user as "logged in"
+  // when both isLoggedIn AND userId are truthy — this matters because
+  // signUp sets userId immediately while isLoggedIn stays false until the
+  // user confirms their email and explicitly signs in.
+  const effectiveUserId = isLoggedIn ? userId : null;
+  const previousUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    void loadFromCache();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadOnboardingState() {
-    try {
-      // Load completed status
-      const completedStr = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
-      if (completedStr) {
-        setCompleted(JSON.parse(completedStr));
-      }
+  useEffect(() => {
+    const prev = previousUserIdRef.current;
+    const curr = effectiveUserId;
+    previousUserIdRef.current = curr;
 
-      // Load profile data
+    if (prev && !curr) {
+      void clearLocal();
+      return;
+    }
+    if (curr) {
+      void syncFromServerOrFlush(curr);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveUserId]);
+
+  async function loadFromCache() {
+    try {
+      const completedStr = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+      if (completedStr) setCompleted(JSON.parse(completedStr));
+
       const profileStr = await AsyncStorage.getItem(ONBOARDING_PROFILE_KEY);
-      if (profileStr) {
-        setProfile(JSON.parse(profileStr));
-      }
+      if (profileStr) setProfile(JSON.parse(profileStr));
     } catch (error) {
-      console.error("Failed to load onboarding state:", error);
+      console.error("Failed to load onboarding cache:", error);
     } finally {
       setIsLoading(false);
     }
   }
 
-  /**
-   * Mark onboarding as completed
-   * Call this after the user finishes the location screen
-   */
+  async function clearLocal() {
+    try {
+      await AsyncStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+      await AsyncStorage.removeItem(ONBOARDING_PROFILE_KEY);
+      setCompleted(false);
+      setProfile(defaultProfile);
+    } catch (error) {
+      console.error("Failed to clear onboarding cache:", error);
+    }
+  }
+
+  async function syncFromServerOrFlush(uid: string) {
+    try {
+      const server = await fetchUserPreferences(uid);
+
+      if (server) {
+        // Server wins. Override exerciseTypes + frequency; preserve client-
+        // only fields (reasons, cookiesAccepted) from whatever is currently
+        // in state.
+        setProfile((prev) => {
+          const merged: OnboardingProfile = {
+            ...prev,
+            exerciseTypes: server.exerciseTypes,
+            frequency: server.frequencyPerWeek ?? prev.frequency,
+          };
+          // Write-through cache; fire-and-forget.
+          void AsyncStorage.setItem(
+            ONBOARDING_PROFILE_KEY,
+            JSON.stringify(merged)
+          );
+          return merged;
+        });
+        return;
+      }
+
+      // Server has nothing. Check AsyncStorage directly (not React state) to
+      // avoid races with the on-mount loadFromCache effect.
+      const localRaw = await AsyncStorage.getItem(ONBOARDING_PROFILE_KEY);
+      if (!localRaw) return;
+      const local = JSON.parse(localRaw) as OnboardingProfile;
+      if (!hasMeaningfulPrefs(local)) return;
+
+      const result = await upsertUserPreferences(uid, profileToPrefs(local));
+      if (result.ok) {
+        console.info(
+          "Flushed pending local preferences to Supabase on sign-in"
+        );
+      } else {
+        console.error(
+          "Failed to flush local preferences on sign-in:",
+          result.error
+        );
+      }
+    } catch (error) {
+      console.error("syncFromServerOrFlush threw:", error);
+    }
+  }
+
   async function setOnboardingCompleted() {
     try {
       await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, JSON.stringify(true));
@@ -91,25 +193,37 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to save onboarding completed:", error);
     }
+
+    // Upsert to Supabase only when we have a real signed-in user. If userId
+    // is set but isLoggedIn is false (email confirmation pending), skip;
+    // the first sign-in will pick this up via syncFromServerOrFlush.
+    if (isLoggedIn && userId) {
+      const result = await upsertUserPreferences(
+        userId,
+        profileToPrefs(profileRef.current)
+      );
+      if (!result.ok) {
+        console.error(
+          "Failed to upsert preferences on completion:",
+          result.error
+        );
+      }
+    }
   }
 
-  /**
-   * Update the user's profile with survey answers
-   * Pass partial updates - they will be merged with existing data
-   */
   async function updateProfile(updates: Partial<OnboardingProfile>) {
     try {
       const newProfile = { ...profile, ...updates };
-      await AsyncStorage.setItem(ONBOARDING_PROFILE_KEY, JSON.stringify(newProfile));
+      await AsyncStorage.setItem(
+        ONBOARDING_PROFILE_KEY,
+        JSON.stringify(newProfile)
+      );
       setProfile(newProfile);
     } catch (error) {
       console.error("Failed to save profile:", error);
     }
   }
 
-  /**
-   * Reset onboarding state (useful for testing)
-   */
   async function resetOnboarding() {
     try {
       await AsyncStorage.removeItem(ONBOARDING_COMPLETED_KEY);
@@ -139,7 +253,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
 /**
  * useOnboarding hook - Access onboarding state and functions
- * Must be used within an OnboardingProvider
+ * Must be used within an OnboardingProvider.
  */
 export function useOnboarding() {
   const context = useContext(OnboardingContext);
