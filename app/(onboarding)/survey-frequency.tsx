@@ -19,16 +19,18 @@ const FREQUENCY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
 export default function SurveyFrequencyScreen() {
   const router = useRouter();
   const { profile, updateProfile } = useOnboarding();
-  
-  // Initialize with existing selection or default to 3
-  const [frequency, setFrequency] = useState(profile.frequency || 3);
+
+  // null = nothing selected yet; user must pick before proceeding.
+  const [frequency, setFrequency] = useState<number | null>(profile.frequency);
 
   function handleBack() {
     router.back();
   }
 
   async function handleNext() {
-    // Save frequency to profile
+    // Defensive: the button is disabled when frequency is null, but guard
+    // anyway so we never persist a partial state.
+    if (frequency === null) return;
     await updateProfile({ frequency });
     router.push("/(onboarding)/survey-reasons");
   }
@@ -80,18 +82,20 @@ export default function SurveyFrequencyScreen() {
           </View>
         </View>
 
-        {/* Selected value display */}
-        <View style={styles.valueDisplay}>
-          <Ionicons name="calendar-outline" size={24} color={colors.primary} />
-          <Text style={styles.valueText}>
-            Selected: <Text style={styles.valueHighlight}>{frequency} {frequency === 1 ? "day" : "days"}</Text> per week
-          </Text>
-        </View>
+        {/* Selected value display — only rendered after user makes a pick */}
+        {frequency !== null && (
+          <View style={styles.valueDisplay}>
+            <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+            <Text style={styles.valueText}>
+              Selected: <Text style={styles.valueHighlight}>{frequency} {frequency === 1 ? "day" : "days"}</Text> per week
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* Next button */}
+      {/* Next button — disabled until a frequency is picked */}
       <View style={styles.buttons}>
-        <PrimaryButton title="Next" onPress={handleNext} />
+        <PrimaryButton title="Next" onPress={handleNext} disabled={frequency === null} />
       </View>
     </SafeAreaView>
   );

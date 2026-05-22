@@ -37,7 +37,12 @@ export function detectIntent(message: string): "workout_plan" | "recommend_studi
 
 /** Build 7-day plan from onboarding frequency and exercise types. Deterministic. */
 export function buildWorkoutPlan(profile: OnboardingProfile): string {
-  const frequency = Math.min(7, Math.max(1, profile.frequency ?? 3));
+  // Explicit null check: refuse to build a plan rather than silently
+  // defaulting to an arbitrary number of active days.
+  if (profile.frequency === null) {
+    return "I need to know your workout frequency first. Set it in your profile, then ask me again.";
+  }
+  const frequency = Math.min(7, Math.max(1, profile.frequency));
   const types = profile.exerciseTypes?.length ? profile.exerciseTypes : ["yoga", "pilates", "hiit"];
   const labels = types.map((id) => EXERCISE_LABELS[id] ?? id);
 

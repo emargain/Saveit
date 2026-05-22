@@ -53,6 +53,10 @@ export default function ProfileScreen() {
     ? profile.exerciseTypes.map((id) => EXERCISE_LABELS[id] || id).join(", ")
     : t("profile.notSet");
 
+  const frequencyDisplay = profile.frequency !== null
+    ? t("profile.frequencyValue", { count: profile.frequency })
+    : t("profile.notSet");
+
   const reasonsDisplay = profile.reasons.length > 0
     ? profile.reasons.map((id) => REASON_LABELS[id] || id).join(", ")
     : t("profile.notSet");
@@ -93,9 +97,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>{t("profile.frequency")}</Text>
-              <Text style={styles.infoValue}>
-                {t("profile.frequencyValue", { count: profile.frequency })}
-              </Text>
+              <Text style={styles.infoValue}>{frequencyDisplay}</Text>
             </View>
           </View>
           <View style={styles.divider} />

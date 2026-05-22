@@ -264,10 +264,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: roleFromForm,
         });
       if (profileError) {
-        console.error(
-          "Failed to insert profile during signup:",
-          profileError
-        );
+        // 23503 (foreign key violation) is the expected outcome when
+        // Supabase's email-enumeration protection fabricates a user object
+        // for an already-registered email — the returned user.id does not
+        // exist in auth.users so the FK insert fails. Not a bug; the
+        // check-email screen copy already covers both cases honestly.
+        if (profileError.code === "23503") {
+          console.info(
+            "Profile insert skipped: Supabase email-enumeration protection (no real user created)."
+          );
+        } else {
+          console.error(
+            "Failed to insert profile during signup:",
+            profileError
+          );
+        }
       }
 
       // isLoggedIn stays false until the email is confirmed and the user
