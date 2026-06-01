@@ -44,7 +44,8 @@ const TAG_OPTIONS = [
   "wellness",
 ];
 
-const PRICE_MAX = 150;
+const PRICE_MAX = 1000;
+const PRICE_STEP = 50;
 
 export default function FiltersScreen() {
   const router = useRouter();
@@ -112,6 +113,7 @@ export default function FiltersScreen() {
             style={styles.slider}
             minimumValue={0}
             maximumValue={PRICE_MAX}
+            step={PRICE_STEP}
             value={priceMin}
             onValueChange={setPriceMin}
             minimumTrackTintColor={colors.primary}
@@ -124,6 +126,7 @@ export default function FiltersScreen() {
             style={styles.slider}
             minimumValue={0}
             maximumValue={PRICE_MAX}
+            step={PRICE_STEP}
             value={priceMax}
             onValueChange={setPriceMax}
             minimumTrackTintColor={colors.primary}

@@ -20,9 +20,11 @@ export interface FilterState {
   selectedTags: string[];
 }
 
+// Price filter ceiling is in MXN. Set high enough to include current seed
+// data (max 540 MXN for peak padel) plus headroom for premium studios.
 const DEFAULT_FILTERS: FilterState = {
   priceMin: 0,
-  priceMax: 150,
+  priceMax: 1000,
   minRating: 0,
   selectedTags: [],
 };
