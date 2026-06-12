@@ -4,6 +4,7 @@
     "discover": "Studios",
     "browse": "Map",
     "favorites": "Favorites",
+    "bookings": "Bookings",
     "coach": "Savi",
     "profile": "Profile"
   },
@@ -124,6 +125,34 @@
     "emptyDesc": "Tap the heart on any deal or last-minute spot to save it.\nWe'll keep them right here for you!",
     "tapHint": "Tap to save",
     "browse": "Browse Discover"
+  },
+  "bookingsTab": {
+    "title": "My Bookings",
+    "tabUpcoming": "Upcoming",
+    "tabPast": "Past",
+    "emptyUpcoming": "No upcoming bookings. Book a slot to see it here.",
+    "emptyPast": "No past bookings yet.",
+    "browseCta": "Browse studios",
+    "signInPrompt": "Sign in to see your bookings",
+    "signInCta": "Sign in",
+    "statusCancelled": "Cancelled",
+    "statusCompleted": "Completed",
+    "statusNoShow": "No-show",
+    "kindClass": "Class",
+    "kindCourt": "Court",
+    "kindSession": "Session",
+    "kindOther": "Other"
+  },
+  "bookingDetail": {
+    "statusConfirmed": "Confirmed",
+    "duration": "{{minutes}} minutes",
+    "priceLabel": "Price",
+    "addressLabel": "Address",
+    "bookingIdLabel": "Booking ID",
+    "cancelNote": "To cancel this booking, please contact the studio directly.",
+    "goToStudio": "Go to studio",
+    "notFound": "Booking not found",
+    "notFoundDesc": "This booking may have been removed."
   },
   "booking": {
     "successTitle": "Booked",

@@ -4,6 +4,7 @@
     "discover": "Estudios",
     "browse": "Mapa",
     "favorites": "Favoritos",
+    "bookings": "Reservas",
     "coach": "Savi",
     "profile": "Perfil"
   },
@@ -124,6 +125,34 @@
     "emptyDesc": "Toca el corazón en cualquier oferta para guardarla.\n¡Las tendremos listas aquí!",
     "tapHint": "Toca para guardar",
     "browse": "Ir a Descubrir"
+  },
+  "bookingsTab": {
+    "title": "Mis reservas",
+    "tabUpcoming": "Próximas",
+    "tabPast": "Pasadas",
+    "emptyUpcoming": "No tienes reservas próximas. Reserva un cupo para verlo aquí.",
+    "emptyPast": "Aún no tienes reservas pasadas.",
+    "browseCta": "Ver estudios",
+    "signInPrompt": "Inicia sesión para ver tus reservas",
+    "signInCta": "Iniciar sesión",
+    "statusCancelled": "Cancelada",
+    "statusCompleted": "Completada",
+    "statusNoShow": "No asistió",
+    "kindClass": "Clase",
+    "kindCourt": "Cancha",
+    "kindSession": "Sesión",
+    "kindOther": "Otro"
+  },
+  "bookingDetail": {
+    "statusConfirmed": "Confirmada",
+    "duration": "{{minutes}} minutos",
+    "priceLabel": "Precio",
+    "addressLabel": "Dirección",
+    "bookingIdLabel": "ID de reserva",
+    "cancelNote": "Para cancelar esta reserva, contacta directamente al estudio.",
+    "goToStudio": "Ver estudio",
+    "notFound": "Reserva no encontrada",
+    "notFoundDesc": "Esta reserva puede haber sido eliminada."
   },
   "booking": {
     "successTitle": "Reservado",

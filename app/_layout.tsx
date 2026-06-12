@@ -38,6 +38,7 @@ export default function RootLayout() {
                     <Stack.Screen name="(tabs)" />
                     <Stack.Screen name="settings" />
                     <Stack.Screen name="partner" />
+                    <Stack.Screen name="booking" />
                     <Stack.Screen name="location-picker" />
                     <Stack.Screen name="filters" options={{ presentation: "modal" }} />
                     <Stack.Screen name="modal" options={{ presentation: "modal" }} />
