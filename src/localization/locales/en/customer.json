@@ -130,7 +130,15 @@
     "successBody": "Your spot is reserved. The partner will see this instantly.",
     "errorTitle": "Could not book",
     "noSlots": "No live slots for this studio yet.",
-    "requiresAuth": "You must be signed in to book."
+    "requiresAuth": "You must be signed in to book.",
+    "errors": {
+      "slotFull": "This slot is full. Try a different time.",
+      "slotNotLive": "This slot is no longer available.",
+      "slotInPast": "This slot has already passed.",
+      "slotNotFound": "We couldn't find that slot. It may have been removed.",
+      "notAuthenticated": "Please sign in to book.",
+      "invalidQuantity": "Please choose a valid quantity."
+    }
   },
   "onboardingComplete": {
     "title": "You're all set",

@@ -15,7 +15,6 @@ import type {
   TimeSlotInventory,
 } from "../types/domain";
 import type { Database, Json } from "../types/supabase";
-import { createId } from "../utils/id";
 import { isSupabaseConfigured } from "./env";
 import { localBundleToPartner } from "./marketplace-mapper";
 import {
@@ -27,7 +26,6 @@ import {
   saveDraftStudio,
   setStudioApproval,
   upsertStudioBundle,
-  addBooking,
   listBookingsForStudio,
   listPendingForAdmin,
 } from "./local-marketplace-store";
@@ -93,6 +91,30 @@ const STUDIO_WITH_SLOTS_SELECT = `
 
 let cachedSupabaseRows: StudioQueryRow[] | null = null;
 const cachedBundleById = new Map<string, LocalStudioBundle>();
+
+export type BookingErrorCode =
+  | "NOT_AUTHENTICATED"
+  | "INVALID_QUANTITY"
+  | "SLOT_NOT_FOUND"
+  | "SLOT_NOT_LIVE"
+  | "SLOT_IN_PAST"
+  | "SLOT_FULL"
+  | "UNKNOWN";
+
+function invalidateMarketplaceCache(): void {
+  cachedSupabaseRows = null;
+  cachedBundleById.clear();
+}
+
+function parseBookingErrorCode(message: string): BookingErrorCode {
+  if (message.includes("NOT_AUTHENTICATED")) return "NOT_AUTHENTICATED";
+  if (message.includes("INVALID_QUANTITY")) return "INVALID_QUANTITY";
+  if (message.includes("SLOT_NOT_FOUND")) return "SLOT_NOT_FOUND";
+  if (message.includes("SLOT_NOT_LIVE")) return "SLOT_NOT_LIVE";
+  if (message.includes("SLOT_IN_PAST")) return "SLOT_IN_PAST";
+  if (message.includes("SLOT_FULL")) return "SLOT_FULL";
+  return "UNKNOWN";
+}
 
 function parsePayload(raw: Json): StudioPayload {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
@@ -514,28 +536,45 @@ export async function createCustomerBooking(params: {
   customerUserId: string;
   customerEmail: string | null;
   quantity: number;
-}): Promise<{ ok: boolean; error?: string }> {
-  const bundle = await getBundleByStudioId(params.studioId);
-  if (!bundle) return { ok: false, error: "studio_not_found" };
-  if (bundle.studio.approvalStatus !== "approved") return { ok: false, error: "not_public" };
-  const slot = bundle.slots.find((s) => s.id === params.slotId);
-  if (!slot || slot.publishStatus !== "live" || slot.isPaused)
-    return { ok: false, error: "slot_unavailable" };
-  if (slot.capacityRemaining < params.quantity) return { ok: false, error: "capacity" };
+}): Promise<
+  | { ok: true; bookingId: string }
+  | { ok: false; errorCode: BookingErrorCode; error: string }
+> {
+  void params.studioId;
+  void params.customerUserId;
+  void params.customerEmail;
 
-  const booking: Booking = {
-    id: createId("book"),
-    studioId: params.studioId,
-    slotId: params.slotId,
-    customerUserId: params.customerUserId,
-    customerEmail: params.customerEmail,
-    quantity: params.quantity,
-    totalPrice: slot.saveItPrice * params.quantity,
-    status: "confirmed",
-    createdAt: new Date().toISOString(),
-  };
-  await addBooking(booking);
-  return { ok: true };
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return {
+      ok: false,
+      errorCode: "UNKNOWN",
+      error: "Supabase is not configured.",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("create_booking", {
+    p_slot_id: params.slotId,
+    p_quantity: params.quantity,
+  });
+
+  if (error) {
+    const errorCode = parseBookingErrorCode(error.message);
+    console.error("[studio-service] create_booking failed:", error);
+    return { ok: false, errorCode, error: error.message };
+  }
+
+  const row = data?.[0];
+  if (!row?.out_booking_id) {
+    return {
+      ok: false,
+      errorCode: "UNKNOWN",
+      error: "Empty response from create_booking.",
+    };
+  }
+
+  invalidateMarketplaceCache();
+  return { ok: true, bookingId: row.out_booking_id };
 }
 
 export async function getPartnerBookings(studioId: string): Promise<Booking[]> {

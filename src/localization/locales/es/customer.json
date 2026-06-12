@@ -130,7 +130,15 @@
     "successBody": "Tu lugar quedó reservado. El socio lo verá al instante.",
     "errorTitle": "No se pudo reservar",
     "noSlots": "Este estudio aún no tiene cupos publicados.",
-    "requiresAuth": "Debes iniciar sesión para reservar."
+    "requiresAuth": "Debes iniciar sesión para reservar.",
+    "errors": {
+      "slotFull": "Este cupo está lleno. Prueba con otro horario.",
+      "slotNotLive": "Este cupo ya no está disponible.",
+      "slotInPast": "Este cupo ya pasó.",
+      "slotNotFound": "No encontramos ese cupo. Puede haber sido eliminado.",
+      "notAuthenticated": "Por favor inicia sesión para reservar.",
+      "invalidQuantity": "Elige una cantidad válida."
+    }
   },
   "onboardingComplete": {
     "title": "Todo listo",

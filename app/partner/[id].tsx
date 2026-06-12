@@ -84,7 +84,26 @@ export default function PartnerDetailsScreen() {
       Alert.alert(t("booking.successTitle"), t("booking.successBody"));
       await load();
     } else {
-      Alert.alert(t("booking.errorTitle"), res.error ?? tc("errors.generic"));
+      const errorMessage = (() => {
+        switch (res.errorCode) {
+          case "SLOT_FULL":
+            return t("booking.errors.slotFull");
+          case "SLOT_NOT_LIVE":
+            return t("booking.errors.slotNotLive");
+          case "SLOT_IN_PAST":
+            return t("booking.errors.slotInPast");
+          case "SLOT_NOT_FOUND":
+            return t("booking.errors.slotNotFound");
+          case "NOT_AUTHENTICATED":
+            return t("booking.errors.notAuthenticated");
+          case "INVALID_QUANTITY":
+            return t("booking.errors.invalidQuantity");
+          case "UNKNOWN":
+          default:
+            return res.error ?? tc("errors.generic");
+        }
+      })();
+      Alert.alert(t("booking.errorTitle"), errorMessage);
     }
   }
 
