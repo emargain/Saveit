@@ -163,7 +163,12 @@ function toInventoryKind(kind: string): InventoryKind {
 function filterLiveFutureSlots(slots: SlotRow[]): SlotRow[] {
   const now = Date.now();
   return slots
-    .filter((s) => s.status === "live" && new Date(s.starts_at).getTime() >= now)
+    .filter(
+      (s) =>
+        s.status === "live" &&
+        new Date(s.starts_at).getTime() >= now &&
+        s.reserved_count < s.capacity
+    )
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
 }
 

@@ -38,6 +38,18 @@ function categoryLabel(category: PartnerCategory, t: (k: string) => string) {
   return t(`discover.categories.${category}`);
 }
 
+function slotAvailabilityText(
+  slot: TimeSlotInventory,
+  t: (key: string, options?: { count?: number }) => string
+): { text: string; urgent: boolean } | null {
+  const remaining = slot.capacityRemaining;
+  if (remaining > 3) return null;
+  if (remaining === 1) {
+    return { text: t("partnerDetail.lastSpot"), urgent: true };
+  }
+  return { text: t("partnerDetail.spotsLeft", { count: remaining }), urgent: false };
+}
+
 export default function PartnerDetailsScreen() {
   const { t } = useAppTranslation("customer");
   const { t: tc } = useAppTranslation("common");
@@ -54,7 +66,9 @@ export default function PartnerDetailsScreen() {
     setPartner(p ?? null);
     const bundle = await getLocalBundleForPartnerId(id);
     setSlots(
-      (bundle?.slots ?? []).filter((s) => s.publishStatus === "live" && !s.isPaused)
+      (bundle?.slots ?? []).filter(
+        (s) => s.publishStatus === "live" && !s.isPaused && s.capacityRemaining > 0
+      )
     );
   }, [id]);
 
@@ -195,24 +209,32 @@ export default function PartnerDetailsScreen() {
         {liveSlots.length === 0 ? (
           <Text style={styles.muted}>{t("booking.noSlots")}</Text>
         ) : (
-          liveSlots.map((slot) => (
+          liveSlots.map((slot) => {
+            const availability = slotAvailabilityText(slot, t);
+            return (
             <View key={slot.id} style={styles.slotRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.slotTitle}>{slot.title}</Text>
                 <Text style={styles.muted}>
-                  {slot.startTime} · {slot.capacityRemaining}/{slot.capacityTotal} · $
-                  {slot.saveItPrice}
+                  {slot.startTime} · ${slot.saveItPrice}
                 </Text>
+                {availability && (
+                  <Text
+                    style={availability.urgent ? styles.spotsLeftUrgent : styles.spotsLeftMuted}
+                  >
+                    {availability.text}
+                  </Text>
+                )}
               </View>
               <Pressable
                 style={styles.bookSmall}
                 onPress={() => handleBook(slot)}
-                disabled={slot.capacityRemaining < 1}
               >
                 <Text style={styles.bookSmallText}>{t("partnerDetail.book")}</Text>
               </Pressable>
             </View>
-          ))
+            );
+          })
         )}
 
         <Pressable
@@ -363,6 +385,17 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textMuted,
     marginBottom: spacing.md,
+  },
+  spotsLeftMuted: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
+  spotsLeftUrgent: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.warning,
+    marginTop: spacing.xs,
   },
   slotRow: {
     flexDirection: "row",

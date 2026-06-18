@@ -68,7 +68,9 @@
     "fromPrice": "Desde ${{from}} – ${{to}}",
     "off": "{{percent}}% dto.",
     "book": "Reservar",
-    "slots": "Cupos disponibles"
+    "slots": "Cupos disponibles",
+    "spotsLeft": "{{count}} lugares disponibles",
+    "lastSpot": "Último lugar"
   },
   "partnerCard": {
     "from": "Desde ${{price}}",

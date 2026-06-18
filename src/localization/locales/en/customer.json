@@ -68,7 +68,10 @@
     "fromPrice": "From ${{from}} – ${{to}}",
     "off": "{{percent}}% off",
     "book": "Book",
-    "slots": "Available slots"
+    "slots": "Available slots",
+    "spotsLeft_one": "{{count}} spot left",
+    "spotsLeft_other": "{{count}} spots left",
+    "lastSpot": "Last spot"
   },
   "partnerCard": {
     "from": "From ${{price}}",
