@@ -1,19 +1,15 @@
 /**
  * Favorites state — user-scoped favorite partner IDs.
  *
- * Storage model (Session 2e):
- *   - AsyncStorage (@saveit_favorites) is a write-through cache for instant
- *     UI on cold start. Still written on every mutation (strangler pattern —
- *     AsyncStorage writes removed in Session 2f).
- *   - Supabase (public.user_favorites) is the source of truth when a user is
- *     signed in. On sign-in: server data overrides local cache.
- *   - On sign-out: local cache is cleared so the next user on the same device
- *     doesn't inherit the previous user's favorites.
+ * Storage model (Session 2e+):
+ *   - Supabase (public.user_favorites) is the source of truth when signed in.
+ *   - On sign-in: fetch from server into React context.
+ *   - On sign-out: clear local state.
+ *   - Optimistic UI on toggle; rolls back on Supabase write failure.
  *
- * Consumer API (unchanged): favoriteIds, isFavorite, toggleFavorite, isLoading.
+ * Consumer API: favoriteIds, isFavorite, toggleFavorite, isLoading.
  */
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -23,8 +19,6 @@ import {
   fetchUserFavorites,
   removeFavorite,
 } from "../services/favorites-service";
-
-const FAVORITES_STORAGE_KEY = "@saveit_favorites";
 
 interface FavoritesContextType {
   favoriteIds: string[];
@@ -50,11 +44,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const prevUserIdRef = useRef<string | null>(null);
 
-  // Cold-start: load from AsyncStorage immediately for instant UI.
-  useEffect(() => {
-    void loadFromCache();
-  }, []);
-
   // Sign-in / sign-out transitions.
   useEffect(() => {
     const prev = prevUserIdRef.current;
@@ -62,36 +51,25 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     prevUserIdRef.current = curr;
 
     if (prev && !curr) {
-      void clearLocal();
+      setFavoriteIds([]);
+      setIsLoading(false);
       return;
     }
     if (curr) {
       void syncFromServer(curr);
+      return;
     }
+    setIsLoading(false);
   }, [effectiveUserId]);
 
-  async function loadFromCache() {
+  async function syncFromServer(uid: string) {
+    setIsLoading(true);
     try {
-      const raw = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
-      const ids = raw ? (JSON.parse(raw) as unknown) : [];
-      setFavoriteIds(Array.isArray(ids) ? ids : []);
-    } catch {
-      setFavoriteIds([]);
+      const serverIds = await fetchUserFavorites(uid);
+      setFavoriteIds(serverIds);
     } finally {
       setIsLoading(false);
     }
-  }
-
-  async function syncFromServer(uid: string) {
-    const serverIds = await fetchUserFavorites(uid);
-    setFavoriteIds(serverIds);
-    // Mirror to AsyncStorage so the next cold start shows user-scoped data.
-    void AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(serverIds));
-  }
-
-  async function clearLocal() {
-    await AsyncStorage.removeItem(FAVORITES_STORAGE_KEY);
-    setFavoriteIds([]);
   }
 
   const isFavorite = useCallback(
@@ -108,20 +86,16 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           ? [...prevIds, id]
           : prevIds.filter((x) => x !== id);
 
-        // Optimistic update.
         setFavoriteIds(nextIds);
-        void AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(nextIds));
 
-        if (!effectiveUserId) return; // Not signed in — AsyncStorage only (strangler).
+        if (!effectiveUserId) return;
 
         const result = adding
           ? await addFavorite(effectiveUserId, id)
           : await removeFavorite(effectiveUserId, id);
 
         if (!result.ok) {
-          // Roll back local state and AsyncStorage.
           setFavoriteIds(prevIds);
-          void AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(prevIds));
           console.error("toggleFavorite Supabase write failed, rolled back:", result.error);
           // TODO: surface this failure as a toast/alert before piloto launch
         }
