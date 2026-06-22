@@ -13,8 +13,9 @@ import { PrimaryButton } from "../../src/ui/Button";
 import { useAuth } from "../../src/auth-context";
 import { useAppTranslation } from "../../src/localization/hooks";
 import { useOnboarding } from "../../src/onboarding-context";
+import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
+import type { Partner } from "../../src/types/partner";
 import { useViews } from "../../src/state/views";
-import { partners, type Partner } from "../../src/data/partners";
 
 const EXERCISE_LABELS: Record<string, string> = {
   yoga: "Yoga", pilates: "Pilates", cycling: "Cycling",
@@ -30,6 +31,7 @@ export default function ProfileScreen() {
   const { userEmail, signOut } = useAuth();
   const { t } = useAppTranslation("customer");
   const { profile } = useOnboarding();
+  const { partners } = useMarketplacePartners();
   const { getTopViewedIds, getViewCount } = useViews();
   const [isSigningOut, setIsSigningOut] = useState(false);
 

@@ -5,8 +5,7 @@
  */
 
 import type { OnboardingProfile } from "../onboarding-context";
-import type { Partner } from "../data/partners";
-import { partners } from "../data/partners";
+import type { Partner } from "../types/partner";
 
 const EXERCISE_LABELS: Record<string, string> = {
   yoga: "Yoga",

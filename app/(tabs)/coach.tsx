@@ -26,8 +26,8 @@ import {
 import { generateCoachReply } from "../../src/coach/generateCoachReply";
 import { useOnboarding } from "../../src/onboarding-context";
 import { useFavorites } from "../../src/state/favorites";
+import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
 import { useLocation } from "../../src/state/location";
-import { partners } from "../../src/data/partners";
 
 type MessageRole = "user" | "coach";
 
@@ -48,6 +48,7 @@ export default function CoachScreen() {
   const [input, setInput] = useState("");
   const { profile } = useOnboarding();
   const { favoriteIds } = useFavorites();
+  const { partners } = useMarketplacePartners();
   const { currentLocation } = useLocation();
 
   function handleSend() {
