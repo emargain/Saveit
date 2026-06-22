@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Partner } from "../data/partners";
+import type { Partner } from "../types/partner";
 import { listMarketplacePartners } from "../services/studio-service";
 
 export function useMarketplacePartners() {

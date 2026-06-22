@@ -18,7 +18,7 @@ import {
   shadow,
   spacing,
 } from "../../src/ui/theme";
-import type { PartnerCategory } from "../../src/data/partners";
+import type { PartnerCategory } from "../../src/types/partner";
 import { PartnerCard } from "../../src/components/PartnerCard";
 import { useFavorites } from "../../src/state/favorites";
 

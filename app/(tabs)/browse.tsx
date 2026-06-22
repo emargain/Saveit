@@ -21,7 +21,7 @@ import {
   shadow,
   spacing,
 } from "../../src/ui/theme";
-import type { Partner, PartnerCategory } from "../../src/data/partners";
+import type { Partner, PartnerCategory } from "../../src/types/partner";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
 import { getCityCoordinates } from "../../src/data/city-coordinates";
 import { useLocation } from "../../src/state/location";

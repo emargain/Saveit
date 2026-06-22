@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import type { Partner } from "../data/partners";
+import type { Partner } from "../types/partner";
 
 export interface FilterState {
   priceMin: number;

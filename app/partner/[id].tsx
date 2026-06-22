@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../src/auth-context";
-import type { Partner, PartnerCategory } from "../../src/data/partners";
+import type { Partner, PartnerCategory } from "../../src/types/partner";
 import { useAppTranslation } from "../../src/localization/hooks";
 import {
   createCustomerBooking,

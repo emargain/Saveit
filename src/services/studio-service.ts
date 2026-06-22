@@ -3,8 +3,7 @@
  * Supabase when configured; local AsyncStorage + seed fallback otherwise.
  */
 
-import { partners as seedPartners } from "../data/partners";
-import type { Partner, PartnerCategory } from "../data/partners";
+import type { Partner, PartnerCategory } from "../types/partner";
 import type {
   ApprovalStatus,
   Booking,
@@ -412,11 +411,9 @@ async function resolveSupabaseBundle(studioId: string): Promise<LocalStudioBundl
 }
 
 async function listFallbackPartners(): Promise<Partner[]> {
-  console.warn("studio-service: Supabase not configured; using hardcoded fallback data");
+  console.warn("studio-service: Supabase not configured; using local marketplace fallback");
   const approved = await listPublicApprovedStudios();
-  const dynamic = approved.map((b) => localBundleToPartner(b));
-  const existingIds = new Set(dynamic.map((p) => p.id));
-  return [...dynamic, ...seedPartners.filter((p) => !existingIds.has(p.id))];
+  return approved.map((b) => localBundleToPartner(b));
 }
 
 export async function listMarketplacePartners(): Promise<Partner[]> {

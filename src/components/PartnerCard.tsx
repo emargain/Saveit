@@ -6,7 +6,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fontSize, fontWeight, radius, shadow, spacing } from "../ui/theme";
-import type { Partner, PartnerCategory } from "../data/partners";
+import type { Partner, PartnerCategory } from "../types/partner";
 
 const CATEGORY_LABELS: Record<PartnerCategory, string> = {
   fitness: "Fitness",

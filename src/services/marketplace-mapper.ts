@@ -1,4 +1,4 @@
-import type { Partner, PartnerCategory } from "../data/partners";
+import type { Partner, PartnerCategory } from "../types/partner";
 import type { LocalStudioBundle, StudioCategory } from "../types/domain";
 
 function mapCategory(c: StudioCategory): PartnerCategory {

@@ -23,7 +23,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PartnerCard } from "../../src/components/PartnerCard";
-import type { Partner, PartnerCategory } from "../../src/data/partners";
+import type { Partner, PartnerCategory } from "../../src/types/partner";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
 import { useAppTranslation } from "../../src/localization/hooks";
 import { useFavorites } from "../../src/state/favorites";
