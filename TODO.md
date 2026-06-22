@@ -3,8 +3,7 @@
     global AsyncStorage blob (`@saveit_onboarding_profile`). New users on the 
     same device see the previous user's preferences. Fix: move to Supabase 
     table scoped by userId, fetch on sign-in.
-    - Favorites likely have the same leak (`@saveit_favorites` is global).
-    - Recent views likely have the same leak (`@saveit_views`).
+    - ~~Favorites (`@saveit_favorites`) and recent views (`@saveit_views`)~~ — fixed in Sessions 2e/2f. Both now Supabase-scoped per user; AsyncStorage strangler removed.
     - Bookings written via `createCustomerBooking` are local-only and global; 
     need to be scoped by userId and persisted to Supabase.
 
@@ -43,13 +42,8 @@
 ### Distance
 - mapStudioRowToPartner currently hardcodes distanceKm to 1 for every studio. Wire useLocation to compute real distances against studio coordinates.
 
-## Known data-source bypasses to clean up
-
-After Session 2c, these two screens still read from src/data/partners.ts (the hardcoded array) instead of useMarketplacePartners():
-- app/(tabs)/profile.tsx — for favorites lookup
-- app/(tabs)/coach.tsx — for coach context
-
-Both should be migrated to the hook in a small cleanup session. Until then, those screens show stale SF mock data. Favorites still functionally works (clicking the heart still persists), but the displayed partner names there will be SF studios, not the Polanco seed data.
+### Guest / unsigned users
+- Guest user favorites are in-session only — no AsyncStorage persistence after the strangler removal. If we want guest hearts to survive app close, add a guest-state local store separate from Supabase. Low priority for piloto since real users sign in.
 
 ## Pricing algorithm (separate session)
 
@@ -61,3 +55,11 @@ Padel valley-vs-peak pricing exists in seed data (450 MXN before 5pm, 540 after)
 
 - Slot times are generated in CDMX local timezone (Date.getHours() based). When expanding beyond one city, timezone needs to become a studio attribute and slot times need to be displayed in the user's local TZ.
 - user_preferences.motivation is a text column but the onboarding wizard collects `reasons` as string[]. Currently dropped on sync. When this matters, add a `reasons text[]` column via migration and update profileToPrefs in onboarding-context.
+
+## Pre-piloto: replace dev slot seeding
+- Dev seed currently generates 7 days of slots starting from "now"; they expire 
+  a week later, breaking dev testing if not re-run
+- Real partners will manage their own slots via partner-side wizard (post-MVP) 
+  or via SQL during piloto onboarding
+- Decide before piloto: keep manual re-seeding, automate via pg_cron, or 
+  build partner slot managementr

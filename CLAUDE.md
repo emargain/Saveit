@@ -25,6 +25,7 @@ These came from hard-won iterations. Don't drift from them without explicit user
 - **Generated Supabase types**: src/types/supabase.ts is the source of truth for column shapes. After any migration, run npm run supabase:types. Don't hand-edit this file.
 - **TODO.md is the deferred work register**: any decision to postpone something gets logged there in the moment.
 - **Commit boundaries match logical work**: feature commits and fix commits go separately. Migration SQL files are committed with their consuming code.
+- **Migration discipline**: every SQL migration applied in the Supabase dashboard must be saved as a numbered file in supabase/migrations/ in the SAME session it was applied. Migration files are the source of truth for schema state; an applied migration without a corresponding file is a future bug. After saving the file, run npm run supabase:types and commit the type changes with the migration.
 
 ## How to start a session
 
@@ -32,6 +33,7 @@ When the user begins a new Claude Code session, the user will typically describe
 1. This file (CLAUDE.md)
 2. TODO.md (current backlog)
 3. The most recent 5 commit messages via `git log --oneline -5`
+4. If the previous session involved migrations, verify their .sql files exist under supabase/migrations/ — if not, flag this before continuing.
 
 Then wait for explicit instructions before making any changes.
 
