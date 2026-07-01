@@ -58,6 +58,62 @@ export type Database = {
           },
         ]
       }
+      pricing_rules: {
+        Row: {
+          created_at: string | null
+          default_discount_pct: number
+          factor_anticipacion_hours_threshold: number
+          factor_anticipacion_lastminute: number
+          factor_horario_off_peak: number
+          factor_horario_peak: number
+          factor_ocupacion_low: number
+          factor_ocupacion_threshold: number
+          floor_price: number
+          peak_windows: Json
+          retail_price_default: number
+          studio_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          default_discount_pct?: number
+          factor_anticipacion_hours_threshold?: number
+          factor_anticipacion_lastminute?: number
+          factor_horario_off_peak?: number
+          factor_horario_peak?: number
+          factor_ocupacion_low?: number
+          factor_ocupacion_threshold?: number
+          floor_price: number
+          peak_windows?: Json
+          retail_price_default: number
+          studio_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          default_discount_pct?: number
+          factor_anticipacion_hours_threshold?: number
+          factor_anticipacion_lastminute?: number
+          factor_horario_off_peak?: number
+          factor_horario_peak?: number
+          factor_ocupacion_low?: number
+          factor_ocupacion_threshold?: number
+          floor_price?: number
+          peak_windows?: Json
+          retail_price_default?: number
+          studio_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_rules_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: true
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -261,6 +317,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_slot_price: {
+        Args: { p_slot_id: string }
+        Returns: {
+          out_discount_pct: number
+          out_dynamic_price: number
+          out_is_last_minute: boolean
+          out_is_low_occupancy: boolean
+          out_is_peak: boolean
+          out_reasons: string[]
+          out_retail_price: number
+          out_slot_id: string
+        }[]
+      }
       create_booking: {
         Args: { p_quantity: number; p_slot_id: string }
         Returns: {
