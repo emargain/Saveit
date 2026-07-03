@@ -93,6 +93,14 @@ export interface PricingRules {
   defaultDiscountPercent: number | null;
 }
 
+export type PricingReason =
+  | "peak_hours"
+  | "off_peak_hours"
+  | "low_occupancy"
+  | "last_minute"
+  | "floor_applied"
+  | "no_rules_configured";
+
 export interface TimeSlotInventory {
   id: string;
   title: string;
@@ -105,8 +113,17 @@ export interface TimeSlotInventory {
   durationMinutes: number;
   capacityTotal: number;
   capacityRemaining: number;
+  /** @deprecated Use retailPriceMxn — kept for local-store bundles */
   retailPrice: number;
+  /** @deprecated Use dynamicPriceMxn / priceMxn — kept for local-store bundles */
   saveItPrice: number;
+  retailPriceMxn: number;
+  dynamicPriceMxn: number;
+  /** Same as dynamicPriceMxn — customer-facing price at query time */
+  priceMxn: number;
+  discountPct: number;
+  primaryReason: PricingReason | null;
+  allReasons: PricingReason[];
   isPeak: boolean;
   isPaused: boolean;
   /** draft | pending_review | live — slot-level publish */

@@ -23,7 +23,8 @@ import {
   getLocalBundleForPartnerId,
   getMarketplacePartnerById,
 } from "../../src/services/studio-service";
-import type { TimeSlotInventory } from "../../src/types/domain";
+import type { TimeSlotInventory, PricingReason } from "../../src/types/domain";
+import { formatMxn } from "../../src/utils/currency";
 import { useViews } from "../../src/state/views";
 import {
   colors,
@@ -183,13 +184,18 @@ export default function PartnerDetailsScreen() {
 
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>
-            {t("partnerDetail.fromPrice", { from: partner.priceFrom, to: partner.priceTo })}
+            {t("partnerDetail.fromPrice", {
+              from: formatMxn(partner.priceFrom),
+              to: formatMxn(partner.priceTo),
+            })}
           </Text>
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>
-              {t("partnerDetail.off", { percent: partner.discountPercent })}
-            </Text>
-          </View>
+          {partner.discountPercent > 0 && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>
+                {t("partnerDetail.off", { percent: partner.discountPercent })}
+              </Text>
+            </View>
+          )}
         </View>
 
         {partner.tags.length > 0 && (
@@ -211,13 +217,36 @@ export default function PartnerDetailsScreen() {
         ) : (
           liveSlots.map((slot) => {
             const availability = slotAvailabilityText(slot, t);
+            const hasDiscount = slot.discountPct > 0;
             return (
             <View key={slot.id} style={styles.slotRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.slotTitle}>{slot.title}</Text>
-                <Text style={styles.muted}>
-                  {slot.startTime} · ${slot.saveItPrice}
-                </Text>
+                <Text style={styles.slotTime}>{slot.startTime}</Text>
+                <View style={styles.slotPriceBlock}>
+                  {hasDiscount && (
+                    <Text style={styles.slotRetailPrice}>
+                      {formatMxn(slot.retailPriceMxn)}
+                    </Text>
+                  )}
+                  <View style={styles.slotPriceRow}>
+                    <Text style={styles.slotDynamicPrice}>
+                      {formatMxn(slot.dynamicPriceMxn)}
+                    </Text>
+                    {hasDiscount && (
+                      <View style={styles.slotDiscountBadge}>
+                        <Text style={styles.slotDiscountBadgeText}>
+                          -{slot.discountPct}%
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  {slot.primaryReason && (
+                    <Text style={styles.slotReason}>
+                      {t(`pricing.reasons.${slot.primaryReason}` as `pricing.reasons.${PricingReason}`)}
+                    </Text>
+                  )}
+                </View>
                 {availability && (
                   <Text
                     style={availability.urgent ? styles.spotsLeftUrgent : styles.spotsLeftMuted}
@@ -408,6 +437,46 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     color: colors.text,
+  },
+  slotTime: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
+  slotPriceBlock: {
+    marginTop: spacing.xs,
+  },
+  slotRetailPrice: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    textDecorationLine: "line-through",
+  },
+  slotPriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginTop: 2,
+  },
+  slotDynamicPrice: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+  },
+  slotDiscountBadge: {
+    backgroundColor: colors.warning,
+    paddingVertical: 2,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+  },
+  slotDiscountBadgeText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: colors.white,
+  },
+  slotReason: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   bookSmall: {
     backgroundColor: colors.primary,

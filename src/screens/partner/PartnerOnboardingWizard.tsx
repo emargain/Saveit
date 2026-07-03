@@ -615,6 +615,8 @@ function buildPlaceholderSlot(studio: StudioEntity, kind: InventoryKind): TimeSl
     studio.approvalStatus === "approved"
       ? "live"
       : ("draft" as const);
+  const retail = studio.pricingRules.averageRetailPrice;
+  const dynamic = studio.pricingRules.minimumSaveItPrice;
   return {
     id: createId("slot"),
     title: "Session",
@@ -626,8 +628,14 @@ function buildPlaceholderSlot(studio: StudioEntity, kind: InventoryKind): TimeSl
     durationMinutes: 60,
     capacityTotal: cap,
     capacityRemaining: cap,
-    retailPrice: studio.pricingRules.averageRetailPrice,
-    saveItPrice: studio.pricingRules.minimumSaveItPrice,
+    retailPrice: retail,
+    saveItPrice: dynamic,
+    retailPriceMxn: retail,
+    dynamicPriceMxn: dynamic,
+    priceMxn: dynamic,
+    discountPct: 0,
+    primaryReason: null,
+    allReasons: [],
     isPeak: false,
     isPaused: false,
     publishStatus: publish,

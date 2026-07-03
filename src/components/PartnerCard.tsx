@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fontSize, fontWeight, radius, shadow, spacing } from "../ui/theme";
 import type { Partner, PartnerCategory } from "../types/partner";
+import { formatMxn } from "../utils/currency";
 
 const CATEGORY_LABELS: Record<PartnerCategory, string> = {
   fitness: "Fitness",
@@ -43,7 +44,7 @@ export function PartnerCard({
 }: PartnerCardProps) {
   const categoryLabel = categoryDisplay ?? getCategoryLabel(partner.category);
   const distanceText = distanceLabel ?? `${partner.distanceKm} km`;
-  const fromPrice = fromPriceLabel ?? `From $${partner.priceFrom}`;
+  const fromPrice = fromPriceLabel ?? `From ${formatMxn(partner.priceFrom)}`;
   const discountLabel = discountLabelProp ?? `${partner.discountPercent}% off`;
 
   return (
@@ -83,9 +84,11 @@ export function PartnerCard({
 
         <View style={styles.priceRow}>
           <Text style={styles.fromPrice}>{fromPrice}</Text>
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>{discountLabel}</Text>
-          </View>
+          {partner.discountPercent > 0 && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>{discountLabel}</Text>
+            </View>
+          )}
         </View>
       </View>
     </Pressable>

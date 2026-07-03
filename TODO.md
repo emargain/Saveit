@@ -51,6 +51,11 @@ Padel valley-vs-peak pricing exists in seed data (450 MXN before 5pm, 540 after)
 - The discounted price vs the retail price
 - Why a slot is discounted (valley hour, last-minute, etc.)
 
+## Session 3b followups
+
+- Booking captures static `slots.price_mxn`, not the displayed dynamic price. Session 3b-followup will pass the displayed price to the RPC and have the server verify within tolerance.
+- Batch RPC for `calculate_slot_price` to avoid N+1 (~25 concurrent calls per studio fetch at piloto scale).
+
 ## Schema scaling concerns
 
 - Slot times are generated in CDMX local timezone (Date.getHours() based). When expanding beyond one city, timezone needs to become a studio attribute and slot times need to be displayed in the user's local TZ.

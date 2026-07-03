@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppTranslation } from "../../src/localization/hooks";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
 import { useFavorites } from "../../src/state/favorites";
+import { formatMxn } from "../../src/utils/currency";
 import { colors, fontSize, fontWeight, radius, shadow, spacing } from "../../src/ui/theme";
 
 const SHARE_URL = "https://saveit.app";
@@ -159,7 +160,7 @@ export default function HomeScreen() {
                       <Ionicons name="star" size={12} color={colors.warning} />
                       <Text style={styles.ratingVal}>{item.rating}</Text>
                     </View>
-                    <Text style={styles.dealPrice}>${item.priceFrom}</Text>
+                    <Text style={styles.dealPrice}>{formatMxn(item.priceFrom)}</Text>
                   </View>
                 </View>
               </Pressable>

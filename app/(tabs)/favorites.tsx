@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { useAppTranslation } from "../../src/localization/hooks";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
+import { formatMxn } from "../../src/utils/currency";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -114,7 +115,7 @@ export default function FavoritesScreen() {
                 onToggleFavorite={() => toggleFavorite(partner.id)}
                 onPress={() => router.push(`/partner/${partner.id}` as import("expo-router").Href)}
                 categoryDisplay={categoryLabel(partner.category, t)}
-                fromPriceLabel={t("partnerCard.from", { price: partner.priceFrom })}
+                fromPriceLabel={t("partnerCard.from", { price: formatMxn(partner.priceFrom) })}
                 discountLabel={t("partnerCard.off", { percent: partner.discountPercent })}
                 distanceLabel={t("partnerCard.km", { n: partner.distanceKm })}
               />

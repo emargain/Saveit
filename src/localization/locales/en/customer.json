@@ -65,7 +65,7 @@
     "notFound": "Partner not found",
     "header": "Partner",
     "tags": "Tags",
-    "fromPrice": "From ${{from}} – ${{to}}",
+    "fromPrice": "From {{from}} – {{to}}",
     "off": "{{percent}}% off",
     "book": "Book",
     "slots": "Available slots",
@@ -74,7 +74,7 @@
     "lastSpot": "Last spot"
   },
   "partnerCard": {
-    "from": "From ${{price}}",
+    "from": "From {{price}}",
     "off": "{{percent}}% off",
     "km": "{{n}} km"
   },
@@ -170,6 +170,16 @@
       "slotNotFound": "We couldn't find that slot. It may have been removed.",
       "notAuthenticated": "Please sign in to book.",
       "invalidQuantity": "Please choose a valid quantity."
+    }
+  },
+  "pricing": {
+    "reasons": {
+      "peak_hours": "Peak hours",
+      "off_peak_hours": "Off-peak",
+      "low_occupancy": "Low occupancy",
+      "last_minute": "Last minute",
+      "floor_applied": "Best price",
+      "no_rules_configured": "Standard price"
     }
   },
   "onboardingComplete": {

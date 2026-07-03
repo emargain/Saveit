@@ -65,7 +65,7 @@
     "notFound": "No se encontró el socio",
     "header": "Socio",
     "tags": "Etiquetas",
-    "fromPrice": "Desde ${{from}} – ${{to}}",
+    "fromPrice": "Desde {{from}} – {{to}}",
     "off": "{{percent}}% dto.",
     "book": "Reservar",
     "slots": "Cupos disponibles",
@@ -73,7 +73,7 @@
     "lastSpot": "Último lugar"
   },
   "partnerCard": {
-    "from": "Desde ${{price}}",
+    "from": "Desde {{price}}",
     "off": "{{percent}}% dto.",
     "km": "{{n}} km"
   },
@@ -169,6 +169,16 @@
       "slotNotFound": "No encontramos ese cupo. Puede haber sido eliminado.",
       "notAuthenticated": "Por favor inicia sesión para reservar.",
       "invalidQuantity": "Elige una cantidad válida."
+    }
+  },
+  "pricing": {
+    "reasons": {
+      "peak_hours": "Horario prime",
+      "off_peak_hours": "Horario valle",
+      "low_occupancy": "Casi vacío",
+      "last_minute": "Última hora",
+      "floor_applied": "Mejor precio",
+      "no_rules_configured": "Precio estándar"
     }
   },
   "onboardingComplete": {

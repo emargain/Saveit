@@ -21,14 +21,17 @@ function priceRangeFromSlots(bundle: LocalStudioBundle): { from: number; to: num
     const avg = bundle.studio.pricingRules.averageRetailPrice || bundle.studio.averageClassPrice;
     return { from: Math.max(0, avg * 0.5), to: avg || 25 };
   }
-  const prices = live.map((s) => s.saveItPrice);
+  const prices = live.map((s) => s.dynamicPriceMxn ?? s.saveItPrice);
   return { from: Math.min(...prices), to: Math.max(...prices) };
 }
 
 function discountPercent(bundle: LocalStudioBundle): number {
+  const live = bundle.slots.filter((s) => s.publishStatus === "live" && !s.isPaused);
+  const fromSlots = live.length > 0 ? Math.max(...live.map((s) => s.discountPct ?? 0)) : 0;
+  if (fromSlots > 0) return fromSlots;
   const d = bundle.studio.pricingRules.defaultDiscountPercent;
   if (d != null && d > 0) return Math.round(d);
-  return 30;
+  return 0;
 }
 
 /**

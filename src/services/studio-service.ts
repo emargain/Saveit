@@ -9,6 +9,7 @@ import type {
   Booking,
   InventoryKind,
   LocalStudioBundle,
+  PricingReason,
   StudioCategory,
   StudioEntity,
   TimeSlotInventory,
@@ -90,6 +91,90 @@ const STUDIO_WITH_SLOTS_SELECT = `
 
 let cachedSupabaseRows: StudioQueryRow[] | null = null;
 const cachedBundleById = new Map<string, LocalStudioBundle>();
+let cachedPriceMap = new Map<string, PricingResult>();
+
+type PricingResult = {
+  slotId: string;
+  retailPrice: number;
+  dynamicPrice: number;
+  discountPct: number;
+  reasons: string[];
+};
+
+const PRICING_REASONS: PricingReason[] = [
+  "peak_hours",
+  "off_peak_hours",
+  "low_occupancy",
+  "last_minute",
+  "floor_applied",
+  "no_rules_configured",
+];
+
+function isPricingReason(value: string): value is PricingReason {
+  return (PRICING_REASONS as string[]).includes(value);
+}
+
+function pickPrimaryReason(reasons: string[]): PricingReason | null {
+  const valid = reasons.filter(isPricingReason);
+  if (valid.length === 0) return null;
+  if (valid.every((r) => r === "peak_hours" || r === "no_rules_configured")) {
+    return null;
+  }
+  const priority: PricingReason[] = [
+    "floor_applied",
+    "last_minute",
+    "low_occupancy",
+    "off_peak_hours",
+  ];
+  for (const reason of priority) {
+    if (valid.includes(reason)) return reason;
+  }
+  return null;
+}
+
+// TODO: replace with a single batch SQL function (e.g. calculate_slot_prices(uuid[]))
+// to collapse ~200 RPC calls on full marketplace load into one round trip.
+async function computePricesForSlots(
+  slotRows: SlotRow[]
+): Promise<Map<string, PricingResult>> {
+  if (slotRows.length === 0) return new Map();
+  const supabase = getSupabaseClient();
+  if (!supabase) return new Map();
+
+  const results = await Promise.all(
+    slotRows.map(async (slot) => {
+      const { data, error } = await supabase.rpc("calculate_slot_price", {
+        p_slot_id: slot.id,
+      });
+      if (error) {
+        console.error("calculate_slot_price failed for slot", slot.id, error);
+        return {
+          slotId: slot.id,
+          retailPrice: Number(slot.retail_price_mxn ?? slot.price_mxn),
+          dynamicPrice: Number(slot.retail_price_mxn ?? slot.price_mxn),
+          discountPct: 0,
+          reasons: [] as string[],
+        };
+      }
+      const row = Array.isArray(data) ? data[0] : data;
+      return {
+        slotId: slot.id,
+        retailPrice: Number(row?.out_retail_price ?? slot.retail_price_mxn ?? slot.price_mxn),
+        dynamicPrice: Number(row?.out_dynamic_price ?? slot.retail_price_mxn ?? slot.price_mxn),
+        discountPct: Number(row?.out_discount_pct ?? 0),
+        reasons: (row?.out_reasons ?? []) as string[],
+      };
+    })
+  );
+
+  return new Map(results.map((r) => [r.slotId, r]));
+}
+
+function invalidateMarketplaceCache(): void {
+  cachedSupabaseRows = null;
+  cachedBundleById.clear();
+  cachedPriceMap = new Map();
+}
 
 export type BookingErrorCode =
   | "NOT_AUTHENTICATED"
@@ -99,11 +184,6 @@ export type BookingErrorCode =
   | "SLOT_IN_PAST"
   | "SLOT_FULL"
   | "UNKNOWN";
-
-function invalidateMarketplaceCache(): void {
-  cachedSupabaseRows = null;
-  cachedBundleById.clear();
-}
 
 function parseBookingErrorCode(message: string): BookingErrorCode {
   if (message.includes("NOT_AUTHENTICATED")) return "NOT_AUTHENTICATED";
@@ -173,11 +253,18 @@ function filterLiveFutureSlots(slots: SlotRow[]): SlotRow[] {
 
 function mapSlotRowToTimeSlotInventory(
   slot: SlotRow,
-  serviceTypes: string[]
+  serviceTypes: string[],
+  pricing?: PricingResult
 ): TimeSlotInventory {
   const startsAt = new Date(slot.starts_at);
   const pad = (n: number) => String(n).padStart(2, "0");
   const nowIso = new Date().toISOString();
+  const fallbackRetail = Number(slot.retail_price_mxn ?? slot.price_mxn);
+  const fallbackDynamic = Number(slot.price_mxn);
+  const retailPriceMxn = pricing?.retailPrice ?? fallbackRetail;
+  const dynamicPriceMxn = pricing?.dynamicPrice ?? fallbackDynamic;
+  const discountPct = pricing?.discountPct ?? 0;
+  const allReasons = (pricing?.reasons ?? []).filter(isPricingReason);
 
   return {
     id: slot.id,
@@ -190,9 +277,15 @@ function mapSlotRowToTimeSlotInventory(
     durationMinutes: slot.duration_minutes,
     capacityTotal: slot.capacity,
     capacityRemaining: Math.max(0, slot.capacity - slot.reserved_count),
-    retailPrice: Number(slot.retail_price_mxn ?? slot.price_mxn),
-    saveItPrice: Number(slot.price_mxn),
-    isPeak: false,
+    retailPrice: retailPriceMxn,
+    saveItPrice: dynamicPriceMxn,
+    retailPriceMxn,
+    dynamicPriceMxn,
+    priceMxn: dynamicPriceMxn,
+    discountPct,
+    primaryReason: pickPrimaryReason(pricing?.reasons ?? []),
+    allReasons,
+    isPeak: allReasons.includes("peak_hours"),
     isPaused: slot.status === "paused",
     publishStatus: slot.status === "draft" ? "draft" : "live",
     createdAt: slot.created_at ?? nowIso,
@@ -202,35 +295,45 @@ function mapSlotRowToTimeSlotInventory(
 
 function priceRangeFromSlotRows(
   liveSlots: SlotRow[],
+  priceMap: Map<string, PricingResult>,
   pricing: StudioPayload["pricing"]
-): { from: number; to: number } {
+): { from: number; to: number; maxDiscountPct: number } {
   if (liveSlots.length > 0) {
-    const prices = liveSlots.map((s) => Number(s.price_mxn));
-    return { from: Math.min(...prices), to: Math.max(...prices) };
+    const dynamicPrices = liveSlots.map(
+      (s) => priceMap.get(s.id)?.dynamicPrice ?? Number(s.price_mxn)
+    );
+    const discountPcts = liveSlots.map((s) => priceMap.get(s.id)?.discountPct ?? 0);
+    return {
+      from: Math.min(...dynamicPrices),
+      to: Math.max(...dynamicPrices),
+      maxDiscountPct: Math.max(...discountPcts),
+    };
   }
   const min = pricing?.minPriceMxn ?? pricing?.avgPriceMxn ?? 25;
   const avg = pricing?.avgPriceMxn ?? min;
-  return { from: Math.max(0, min), to: Math.max(min, avg) };
+  return {
+    from: Math.max(0, min),
+    to: Math.max(min, avg),
+    maxDiscountPct: pricing?.defaultDiscountPct ?? 0,
+  };
 }
 
-function discountPercentFromPayload(
+function discountPercentFromPricing(
   liveSlots: SlotRow[],
+  priceMap: Map<string, PricingResult>,
   pricing: StudioPayload["pricing"]
 ): number {
+  const { maxDiscountPct } = priceRangeFromSlotRows(liveSlots, priceMap, pricing);
+  if (maxDiscountPct > 0) return maxDiscountPct;
   const configured = pricing?.defaultDiscountPct;
   if (configured != null && configured > 0) return Math.round(configured);
-  const withRetail = liveSlots.find(
-    (s) => s.retail_price_mxn != null && Number(s.retail_price_mxn) > Number(s.price_mxn)
-  );
-  if (withRetail && withRetail.retail_price_mxn) {
-    const retail = Number(withRetail.retail_price_mxn);
-    const save = Number(withRetail.price_mxn);
-    if (retail > 0) return Math.round(((retail - save) / retail) * 100);
-  }
-  return 30;
+  return 0;
 }
 
-function mapStudioRowToBundle(row: StudioQueryRow): LocalStudioBundle {
+function mapStudioRowToBundle(
+  row: StudioQueryRow,
+  priceMap: Map<string, PricingResult>
+): LocalStudioBundle {
   const payload = parsePayload(row.payload);
   const serviceTypes = Array.isArray(payload.serviceTypes)
     ? payload.serviceTypes.filter((s): s is string => typeof s === "string")
@@ -296,13 +399,17 @@ function mapStudioRowToBundle(row: StudioQueryRow): LocalStudioBundle {
 
   return {
     studio,
-    slots: liveSlots.map((s) => mapSlotRowToTimeSlotInventory(s, serviceTypes)),
+    slots: liveSlots.map((s) => mapSlotRowToTimeSlotInventory(s, serviceTypes, priceMap.get(s.id))),
     bookings: [],
   };
 }
 
 /** Maps a Supabase studio row (+ nested slots) to the customer Partner card model. */
-function mapStudioRowToPartner(row: StudioQueryRow, distanceKm = 1): Partner {
+function mapStudioRowToPartner(
+  row: StudioQueryRow,
+  priceMap: Map<string, PricingResult>,
+  distanceKm = 1
+): Partner {
   const payload = parsePayload(row.payload);
   const serviceTypes = Array.isArray(payload.serviceTypes)
     ? payload.serviceTypes.filter((s): s is string => typeof s === "string")
@@ -315,7 +422,11 @@ function mapStudioRowToPartner(row: StudioQueryRow, distanceKm = 1): Partner {
     : [];
   const allSlots = Array.isArray(row.slots) ? row.slots : [];
   const liveSlots = filterLiveFutureSlots(allSlots);
-  const { from, to } = priceRangeFromSlotRows(liveSlots, payload.pricing);
+  const { from, to } = priceRangeFromSlotRows(
+    liveSlots,
+    priceMap,
+    payload.pricing
+  );
   const category = toPartnerCategory(payload.category);
 
   return {
@@ -325,7 +436,7 @@ function mapStudioRowToPartner(row: StudioQueryRow, distanceKm = 1): Partner {
     tags: tags.length > 0 ? tags : serviceTypes.length > 0 ? serviceTypes : [category],
     priceFrom: Math.round(from),
     priceTo: Math.round(to),
-    discountPercent: discountPercentFromPayload(liveSlots, payload.pricing),
+    discountPercent: discountPercentFromPricing(liveSlots, priceMap, payload.pricing),
     rating: typeof payload.rating === "number" ? payload.rating : 4.8,
     distanceKm,
     locationName: payload.address?.city ?? payload.address?.region ?? "CDMX",
@@ -335,11 +446,19 @@ function mapStudioRowToPartner(row: StudioQueryRow, distanceKm = 1): Partner {
   };
 }
 
-function cacheSupabaseRows(rows: StudioQueryRow[]): void {
+async function cacheSupabaseRows(rows: StudioQueryRow[]): Promise<void> {
   cachedSupabaseRows = rows;
   cachedBundleById.clear();
+
+  const allLiveSlots: SlotRow[] = [];
   for (const row of rows) {
-    cachedBundleById.set(row.id, mapStudioRowToBundle(row));
+    const slots = Array.isArray(row.slots) ? row.slots : [];
+    allLiveSlots.push(...filterLiveFutureSlots(slots));
+  }
+  cachedPriceMap = await computePricesForSlots(allLiveSlots);
+
+  for (const row of rows) {
+    cachedBundleById.set(row.id, mapStudioRowToBundle(row, cachedPriceMap));
   }
 }
 
@@ -382,14 +501,14 @@ async function fetchStudioByIdFromSupabase(studioId: string): Promise<StudioQuer
 
 async function loadSupabaseMarketplacePartners(): Promise<Partner[]> {
   if (cachedSupabaseRows) {
-    return cachedSupabaseRows.map((row) => mapStudioRowToPartner(row));
+    return cachedSupabaseRows.map((row) => mapStudioRowToPartner(row, cachedPriceMap));
   }
 
   const rows = await fetchApprovedStudiosFromSupabase();
   if (rows === null) return [];
 
-  cacheSupabaseRows(rows);
-  return rows.map((row) => mapStudioRowToPartner(row));
+  await cacheSupabaseRows(rows);
+  return rows.map((row) => mapStudioRowToPartner(row, cachedPriceMap));
 }
 
 async function resolveSupabaseBundle(studioId: string): Promise<LocalStudioBundle | null> {
@@ -405,7 +524,9 @@ async function resolveSupabaseBundle(studioId: string): Promise<LocalStudioBundl
   const row = await fetchStudioByIdFromSupabase(studioId);
   if (!row) return null;
 
-  const bundle = mapStudioRowToBundle(row);
+  const liveSlots = filterLiveFutureSlots(Array.isArray(row.slots) ? row.slots : []);
+  const priceMap = await computePricesForSlots(liveSlots);
+  const bundle = mapStudioRowToBundle(row, priceMap);
   cachedBundleById.set(studioId, bundle);
   return bundle;
 }
@@ -427,12 +548,14 @@ export async function getMarketplacePartnerById(id: string): Promise<Partner | n
   if (isSupabaseConfigured()) {
     if (cachedSupabaseRows) {
       const row = cachedSupabaseRows.find((r) => r.id === id);
-      if (row) return mapStudioRowToPartner(row);
+      if (row) return mapStudioRowToPartner(row, cachedPriceMap);
     }
     const row = await fetchStudioByIdFromSupabase(id);
     if (row) {
-      cachedBundleById.set(id, mapStudioRowToBundle(row));
-      return mapStudioRowToPartner(row);
+      const liveSlots = filterLiveFutureSlots(Array.isArray(row.slots) ? row.slots : []);
+      const priceMap = await computePricesForSlots(liveSlots);
+      cachedBundleById.set(id, mapStudioRowToBundle(row, priceMap));
+      return mapStudioRowToPartner(row, priceMap);
     }
     return null;
   }
