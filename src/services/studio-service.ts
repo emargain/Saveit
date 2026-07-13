@@ -201,17 +201,19 @@ function parsePayload(raw: Json): StudioPayload {
 }
 
 function toPartnerCategory(category: string | undefined): PartnerCategory {
-  switch (category?.toLowerCase()) {
-    case "padel":
-      return "padel";
-    case "beauty":
-      return "beauty";
-    case "wellness":
-    case "recovery":
-      return "wellness";
-    default:
-      return "fitness";
-  }
+  if (!category || typeof category !== "string") return "fitness";
+  const slug = category.trim().toLowerCase();
+  if (!slug) return "fitness";
+
+  // Legacy aliases → current marketplace slugs.
+  if (slug === "recovery") return "wellness";
+  if (slug === "yoga") return "yoga_flex";
+  if (slug === "boxing") return "boxeo";
+
+  // Pass through known and unknown slugs so new categories (yoga_flex, boxeo,
+  // etc.) still render. Do not collapse unknown → fitness.
+  // TODO: once all seed studios use public.categories slugs, drop the aliases above.
+  return slug;
 }
 
 function toStudioCategory(category: string | undefined): StudioCategory {
@@ -229,7 +231,15 @@ function toStudioCategory(category: string | undefined): StudioCategory {
   if (category && valid.includes(category as StudioCategory)) {
     return category as StudioCategory;
   }
-  return toPartnerCategory(category) === "padel" ? "padel" : "fitness";
+  // Unknown payload categories (e.g. yoga_flex, boxeo) are not in StudioCategory;
+  // map to the closest domain enum for partner-dashboard shapes only.
+  const partner = toPartnerCategory(category);
+  if (partner === "padel") return "padel";
+  if (partner === "beauty") return "beauty";
+  if (partner === "wellness") return "wellness";
+  if (partner === "yoga_flex") return "yoga";
+  if (partner === "boxeo") return "boxing";
+  return "fitness";
 }
 
 function toInventoryKind(kind: string): InventoryKind {

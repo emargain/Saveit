@@ -10,8 +10,13 @@ function mapCategory(c: StudioCategory): PartnerCategory {
     case "wellness":
     case "recovery":
       return "wellness";
+    case "yoga":
+      return "yoga_flex";
+    case "boxing":
+      return "boxeo";
     default:
-      return "fitness";
+      // Pass through other StudioCategory values as-is (fitness, pilates, other).
+      return c;
   }
 }
 

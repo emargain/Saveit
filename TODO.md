@@ -56,6 +56,13 @@ Padel valley-vs-peak pricing exists in seed data (450 MXN before 5pm, 540 after)
 - Booking captures static `slots.price_mxn`, not the displayed dynamic price. Session 3b-followup will pass the displayed price to the RPC and have the server verify within tolerance.
 - Batch RPC for `calculate_slot_price` to avoid N+1 (~25 concurrent calls per studio fetch at piloto scale).
 
+## Categories (Session categories strangler)
+
+- Save migration 011 (`categories` table) into `supabase/migrations/` — applied live and types regenerated, but the SQL file is missing from the repo (same applied-but-not-saved pattern as 2a/2e).
+- After verifying Home/Discover tiles against Supabase, delete hardcoded FALLBACK_CATEGORIES in `app/(tabs)/index.tsx` and FALLBACK_DISCOVER_CATEGORY_IDS in `app/(tabs)/discover.tsx`.
+- `categories.display_name` is Spanish-only. Add `display_name_es` / `display_name_en` (or a locale map) when bilingual category labels are needed; tracked also in categories-service.ts.
+- Seed studios still store legacy/payload category strings; once all use public.categories slugs, drop yoga→yoga_flex and boxing→boxeo aliases in studio-service.toPartnerCategory.
+
 ## Schema scaling concerns
 
 - Slot times are generated in CDMX local timezone (Date.getHours() based). When expanding beyond one city, timezone needs to become a studio attribute and slot times need to be displayed in the user's local TZ.

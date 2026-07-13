@@ -29,11 +29,15 @@ import { useFilters } from "../../src/state/filters";
 
 type ViewMode = "list" | "map";
 
-const CATEGORY_LABELS: Record<PartnerCategory, string> = {
+const CATEGORY_LABELS: Record<string, string> = {
   fitness: "Fitness",
   padel: "Padel",
   beauty: "Beauty",
   wellness: "Wellness",
+  yoga_flex: "Yoga / Flex",
+  boxeo: "Boxing",
+  yoga: "Yoga / Flex",
+  boxing: "Boxing",
 };
 
 function getCategoryLabel(category: PartnerCategory): string {

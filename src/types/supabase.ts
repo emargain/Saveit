@@ -58,6 +58,39 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          color_hex: string | null
+          created_at: string | null
+          display_name: string
+          display_order: number
+          icon_name: string | null
+          is_active: boolean
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          color_hex?: string | null
+          created_at?: string | null
+          display_name: string
+          display_order?: number
+          icon_name?: string | null
+          is_active?: boolean
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          color_hex?: string | null
+          created_at?: string | null
+          display_name?: string
+          display_order?: number
+          icon_name?: string | null
+          is_active?: boolean
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       pricing_rules: {
         Row: {
           created_at: string | null

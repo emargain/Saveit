@@ -9,11 +9,15 @@ import { colors, fontSize, fontWeight, radius, shadow, spacing } from "../ui/the
 import type { Partner, PartnerCategory } from "../types/partner";
 import { formatMxn } from "../utils/currency";
 
-const CATEGORY_LABELS: Record<PartnerCategory, string> = {
+const CATEGORY_LABELS: Record<string, string> = {
   fitness: "Fitness",
   padel: "Padel",
   beauty: "Beauty",
   wellness: "Wellness",
+  yoga_flex: "Yoga / Flex",
+  boxeo: "Boxing",
+  yoga: "Yoga / Flex",
+  boxing: "Boxing",
 };
 
 function getCategoryLabel(category: PartnerCategory): string {

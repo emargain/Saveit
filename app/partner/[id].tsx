@@ -25,6 +25,7 @@ import {
 } from "../../src/services/studio-service";
 import type { TimeSlotInventory, PricingReason } from "../../src/types/domain";
 import { formatMxn } from "../../src/utils/currency";
+import { useCategories } from "../../src/state/categories";
 import { useViews } from "../../src/state/views";
 import {
   colors,
@@ -35,8 +36,15 @@ import {
   spacing,
 } from "../../src/ui/theme";
 
-function categoryLabel(category: PartnerCategory, t: (k: string) => string) {
-  return t(`discover.categories.${category}`);
+function categoryLabel(
+  category: PartnerCategory,
+  t: (k: string) => string,
+  displayNames?: Record<string, string>
+) {
+  if (displayNames?.[category]) return displayNames[category];
+  const key = `discover.categories.${category}`;
+  const translated = t(key);
+  return translated === key ? category : translated;
 }
 
 function slotAvailabilityText(
@@ -58,8 +66,15 @@ export default function PartnerDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { incrementView } = useViews();
+  const { categories: remoteCategories } = useCategories();
   const [partner, setPartner] = useState<Partner | null>(null);
   const [slots, setSlots] = useState<TimeSlotInventory[]>([]);
+
+  const displayNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of remoteCategories) map[c.slug] = c.displayName;
+    return map;
+  }, [remoteCategories]);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -139,7 +154,7 @@ export default function PartnerDetailsScreen() {
     );
   }
 
-  const cat = categoryLabel(partner.category, t);
+  const cat = categoryLabel(partner.category, t, displayNames);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>

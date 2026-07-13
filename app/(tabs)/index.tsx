@@ -15,8 +15,10 @@ import { FlatList, Pressable, ScrollView, Share, StyleSheet, Text, View } from "
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppTranslation } from "../../src/localization/hooks";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
+import { useCategories } from "../../src/state/categories";
 import { useFavorites } from "../../src/state/favorites";
 import { formatMxn } from "../../src/utils/currency";
+import { resolveCategoryIcon } from "../../src/utils/category-icons";
 import { colors, fontSize, fontWeight, radius, shadow, spacing } from "../../src/ui/theme";
 
 const SHARE_URL = "https://saveit.app";
@@ -25,9 +27,11 @@ interface CategoryItem {
   id: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
+  displayName?: string;
 }
 
-const CATEGORIES: CategoryItem[] = [
+/** Hardcoded fallback — kept during strangler until Supabase categories are verified. */
+const FALLBACK_CATEGORIES: CategoryItem[] = [
   { id: "fitness", icon: "barbell-outline", color: "#6366F1" },
   { id: "yoga", icon: "body-outline", color: "#EC4899" },
   { id: "padel", icon: "tennisball-outline", color: "#F59E0B" },
@@ -41,6 +45,21 @@ export default function HomeScreen() {
   const { t } = useAppTranslation("customer");
   const { partners, loading } = useMarketplacePartners();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { categories: remoteCategories, isLoading: categoriesLoading } = useCategories();
+
+  const categoryTiles: CategoryItem[] =
+    !categoriesLoading && remoteCategories.length > 0
+      ? remoteCategories.map((c) => ({
+          id: c.slug,
+          icon: resolveCategoryIcon(c.iconName),
+          color: c.colorHex ?? colors.primary,
+          displayName: c.displayName,
+        }))
+      : FALLBACK_CATEGORIES;
+
+  // Prefer displayName from Supabase; fall back to i18n keys for hardcoded list.
+  const categoryLabel = (cat: CategoryItem & { displayName?: string }) =>
+    cat.displayName ?? t(`home.categories.${cat.id}`);
 
   const topDeals = partners.slice(0, 8);
 
@@ -86,7 +105,7 @@ export default function HomeScreen() {
         {/* ── Categories grid ── */}
         <Text style={styles.sectionTitle}>{t("home.categoriesTitle")}</Text>
         <View style={styles.categoryGrid}>
-          {CATEGORIES.map((cat) => (
+          {categoryTiles.map((cat) => (
             <Pressable
               key={cat.id}
               style={({ pressed }) => [styles.categoryCard, pressed && styles.categoryCardPressed]}
@@ -96,7 +115,7 @@ export default function HomeScreen() {
                 <Ionicons name={cat.icon} size={26} color={cat.color} />
               </View>
               <Text style={styles.categoryLabel} numberOfLines={1}>
-                {t(`home.categories.${cat.id}`)}
+                {categoryLabel(cat)}
               </Text>
             </Pressable>
           ))}

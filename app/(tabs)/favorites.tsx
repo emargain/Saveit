@@ -21,10 +21,18 @@ import {
 } from "../../src/ui/theme";
 import type { PartnerCategory } from "../../src/types/partner";
 import { PartnerCard } from "../../src/components/PartnerCard";
+import { useCategories } from "../../src/state/categories";
 import { useFavorites } from "../../src/state/favorites";
 
-function categoryLabel(category: PartnerCategory, t: (k: string) => string) {
-  return t(`discover.categories.${category}`);
+function categoryLabel(
+  category: PartnerCategory,
+  t: (k: string) => string,
+  displayNames?: Record<string, string>
+) {
+  if (displayNames?.[category]) return displayNames[category];
+  const key = `discover.categories.${category}`;
+  const translated = t(key);
+  return translated === key ? category : translated;
 }
 
 export default function FavoritesScreen() {
@@ -32,6 +40,13 @@ export default function FavoritesScreen() {
   const router = useRouter();
   const { favoriteIds, isFavorite, toggleFavorite } = useFavorites();
   const { partners: marketplacePartners } = useMarketplacePartners();
+  const { categories: remoteCategories } = useCategories();
+
+  const displayNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of remoteCategories) map[c.slug] = c.displayName;
+    return map;
+  }, [remoteCategories]);
 
   const favoritePartners = useMemo(
     () => marketplacePartners.filter((p) => favoriteIds.includes(p.id)),
@@ -114,7 +129,7 @@ export default function FavoritesScreen() {
                 isFavorite={isFavorite(partner.id)}
                 onToggleFavorite={() => toggleFavorite(partner.id)}
                 onPress={() => router.push(`/partner/${partner.id}` as import("expo-router").Href)}
-                categoryDisplay={categoryLabel(partner.category, t)}
+                categoryDisplay={categoryLabel(partner.category, t, displayNames)}
                 fromPriceLabel={t("partnerCard.from", { price: formatMxn(partner.priceFrom) })}
                 discountLabel={t("partnerCard.off", { percent: partner.discountPercent })}
                 distanceLabel={t("partnerCard.km", { n: partner.distanceKm })}

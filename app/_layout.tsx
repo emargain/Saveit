@@ -13,6 +13,7 @@ import { AuthProvider } from "../src/auth-context";
 import { I18nGate } from "../src/localization/I18nGate";
 import { OnboardingProvider } from "../src/onboarding-context";
 import { wipeStaleLocalBlobIfNeeded } from "../src/services/migrations";
+import { CategoriesProvider } from "../src/state/categories";
 import { FavoritesProvider } from "../src/state/favorites";
 import { FiltersProvider } from "../src/state/filters";
 import { LocationProvider } from "../src/state/location";
@@ -27,27 +28,29 @@ export default function RootLayout() {
     <I18nGate>
       <AuthProvider>
         <OnboardingProvider>
-          <FavoritesProvider>
-            <FiltersProvider>
-              <ViewsProvider>
-                <LocationProvider>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(onboarding)" />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="settings" />
-                    <Stack.Screen name="partner" />
-                    <Stack.Screen name="booking" />
-                    <Stack.Screen name="location-picker" />
-                    <Stack.Screen name="filters" options={{ presentation: "modal" }} />
-                    <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-                  </Stack>
-                  <StatusBar style="dark" />
-                </LocationProvider>
-              </ViewsProvider>
-            </FiltersProvider>
-          </FavoritesProvider>
+          <CategoriesProvider>
+            <FavoritesProvider>
+              <FiltersProvider>
+                <ViewsProvider>
+                  <LocationProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="(onboarding)" />
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="settings" />
+                      <Stack.Screen name="partner" />
+                      <Stack.Screen name="booking" />
+                      <Stack.Screen name="location-picker" />
+                      <Stack.Screen name="filters" options={{ presentation: "modal" }} />
+                      <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+                    </Stack>
+                    <StatusBar style="dark" />
+                  </LocationProvider>
+                </ViewsProvider>
+              </FiltersProvider>
+            </FavoritesProvider>
+          </CategoriesProvider>
         </OnboardingProvider>
       </AuthProvider>
     </I18nGate>

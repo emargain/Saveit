@@ -9,8 +9,8 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, type Href } from "expo-router";
-import { useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -26,6 +26,7 @@ import { PartnerCard } from "../../src/components/PartnerCard";
 import type { Partner, PartnerCategory } from "../../src/types/partner";
 import { useMarketplacePartners } from "../../src/hooks/useMarketplacePartners";
 import { useAppTranslation } from "../../src/localization/hooks";
+import { useCategories } from "../../src/state/categories";
 import { useFavorites } from "../../src/state/favorites";
 import { formatMxn } from "../../src/utils/currency";
 import { useFilters } from "../../src/state/filters";
@@ -41,11 +42,19 @@ import {
 
 type SortId = "relevance" | "distance" | "discount" | "rating";
 
+/** Hardcoded Discover pills — kept as strangler fallback if Supabase is empty. */
+const FALLBACK_DISCOVER_CATEGORY_IDS = ["fitness", "padel", "beauty", "wellness"] as const;
+
 function categoryLabelFor(
   category: PartnerCategory,
-  t: (k: string) => string
+  t: (k: string) => string,
+  displayNames?: Record<string, string>
 ): string {
-  return t(`discover.categories.${category}`);
+  if (displayNames?.[category]) return displayNames[category];
+  const key = `discover.categories.${category}`;
+  const translated = t(key);
+  // i18next returns the key when missing — fall back to the raw slug.
+  return translated === key ? category : translated;
 }
 
 function matchesSearch(partner: Partner, query: string, catLabel: string): boolean {
@@ -60,6 +69,7 @@ function matchesSearch(partner: Partner, query: string, catLabel: string): boole
 export default function DiscoverScreen() {
   const { t } = useAppTranslation("customer");
   const router = useRouter();
+  const { cat: catParam } = useLocalSearchParams<{ cat?: string }>();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortId>("relevance");
@@ -68,17 +78,30 @@ export default function DiscoverScreen() {
   const { matchesFilters } = useFilters();
   const { currentLocation } = useLocation();
   const { partners: marketplacePartners, loading: partnersLoading } = useMarketplacePartners();
+  const { categories: remoteCategories, isLoading: categoriesLoading } = useCategories();
 
-  const categories = useMemo(
-    () => [
-      { id: "all", label: t("discover.categories.all") },
-      { id: "fitness", label: t("discover.categories.fitness") },
-      { id: "padel", label: t("discover.categories.padel") },
-      { id: "beauty", label: t("discover.categories.beauty") },
-      { id: "wellness", label: t("discover.categories.wellness") },
-    ],
-    [t]
-  );
+  useEffect(() => {
+    if (typeof catParam === "string" && catParam.length > 0) {
+      setSelectedCategory(catParam);
+    }
+  }, [catParam]);
+
+  const displayNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of remoteCategories) map[c.slug] = c.displayName;
+    return map;
+  }, [remoteCategories]);
+
+  const categories = useMemo(() => {
+    const pills =
+      !categoriesLoading && remoteCategories.length > 0
+        ? remoteCategories.map((c) => ({ id: c.slug, label: c.displayName }))
+        : FALLBACK_DISCOVER_CATEGORY_IDS.map((id) => ({
+            id,
+            label: t(`discover.categories.${id}`),
+          }));
+    return [{ id: "all", label: t("discover.categories.all") }, ...pills];
+  }, [remoteCategories, categoriesLoading, t]);
 
   const sortOptions = useMemo(
     () =>
@@ -98,7 +121,7 @@ export default function DiscoverScreen() {
         : marketplacePartners.filter((p) => p.category === selectedCategory);
     const bySearch = searchQuery.trim()
       ? byCategory.filter((p) =>
-          matchesSearch(p, searchQuery, categoryLabelFor(p.category, t))
+          matchesSearch(p, searchQuery, categoryLabelFor(p.category, t, displayNames))
         )
       : byCategory;
     const byFilters = bySearch.filter((p) => matchesFilters(p));
@@ -111,7 +134,15 @@ export default function DiscoverScreen() {
       sorted.sort((a, b) => b.rating - a.rating);
     }
     return sorted;
-  }, [selectedCategory, searchQuery, sortBy, matchesFilters, marketplacePartners, t]);
+  }, [
+    selectedCategory,
+    searchQuery,
+    sortBy,
+    matchesFilters,
+    marketplacePartners,
+    t,
+    displayNames,
+  ]);
 
   const isEmpty = !partnersLoading && displayedPartners.length === 0;
   const sortLabel =
@@ -307,7 +338,7 @@ export default function DiscoverScreen() {
                   isFavorite={isFavorite(partner.id)}
                   onToggleFavorite={() => toggleFavorite(partner.id)}
                   onPress={() => router.push(`/partner/${partner.id}` as import("expo-router").Href)}
-                  categoryDisplay={categoryLabelFor(partner.category, t)}
+                  categoryDisplay={categoryLabelFor(partner.category, t, displayNames)}
                   fromPriceLabel={t("partnerCard.from", { price: formatMxn(partner.priceFrom) })}
                   discountLabel={t("partnerCard.off", { percent: partner.discountPercent })}
                   distanceLabel={t("partnerCard.km", { n: partner.distanceKm })}
